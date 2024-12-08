@@ -1,187 +1,209 @@
 <template>
-  <TransitionRoot as="template" :show="isOpen">
-    <Dialog as="div" class="relative z-10" @close="close">
-      <TransitionChild
-        as="template"
-        enter="ease-in-out duration-500"
-        enter-from="opacity-0"
-        enter-to="opacity-100"
-        leave="ease-in-out duration-500"
-        leave-from="opacity-100"
-        leave-to="opacity-0"
+  <div 
+    class="fixed inset-y-0 right-0 w-[600px] bg-white shadow-xl transform transition-transform duration-300 ease-in-out overflow-hidden flex flex-col"
+    :class="{ 'translate-x-0': show, 'translate-x-full': !show }"
+  >
+    <!-- 顶部栏 -->
+    <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200 flex-shrink-0">
+      <h2 class="text-xl font-semibold text-gray-900">Lead Details</h2>
+      <button
+        @click="$emit('close')"
+        class="text-gray-400 hover:text-gray-500"
       >
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-      </TransitionChild>
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
 
-      <div class="fixed inset-0 overflow-hidden">
-        <div class="absolute inset-0 overflow-hidden">
-          <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
-            <TransitionChild
-              as="template"
-              enter="transform transition ease-in-out duration-500"
-              enter-from="translate-x-full"
-              enter-to="translate-x-0"
-              leave="transform transition ease-in-out duration-500"
-              leave-from="translate-x-0"
-              leave-to="translate-x-full"
-            >
-              <DialogPanel class="pointer-events-auto w-screen max-w-md">
-                <div class="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
-                  <div class="px-4 py-6 sm:px-6">
-                    <div class="flex items-start justify-between">
-                      <h2 class="text-lg font-medium text-gray-900">Lead Details</h2>
-                      <button
-                        type="button"
-                        class="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
-                        @click="close"
-                      >
-                        <XMarkIcon class="h-6 w-6" />
-                      </button>
-                    </div>
-                  </div>
-                  <div v-if="lead" class="relative flex-1 px-4 sm:px-6">
-                    <div class="space-y-6">
-                      <!-- 基本信息 -->
-                      <div>
-                        <div class="flex items-center">
-                          <img
-                            :src="lead.avatar"
-                            :alt="lead.name"
-                            class="h-16 w-16 rounded-full"
-                          />
-                          <div class="ml-4">
-                            <h3 class="text-xl font-medium text-gray-900">
-                              {{ lead.name }}
-                            </h3>
-                            <p class="text-sm text-gray-500">{{ lead.title }}</p>
-                          </div>
-                        </div>
-                        <div class="mt-4 grid grid-cols-2 gap-4">
-                          <a
-                            href="#"
-                            class="flex items-center text-gray-600 hover:text-gray-900"
-                          >
-                            <EnvelopeIcon class="h-5 w-5 mr-2" />
-                            {{ lead.email }}
-                          </a>
-                          <a
-                            href="#"
-                            class="flex items-center text-gray-600 hover:text-gray-900"
-                          >
-                            <MapPinIcon class="h-5 w-5 mr-2" />
-                            {{ lead.location }}
-                          </a>
-                        </div>
-                      </div>
+    <!-- 内容区域 -->
+    <div class="flex-1 overflow-y-auto">
+      <div v-if="lead" class="p-6 space-y-6">
+        <!-- 基本信息 -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <div class="flex items-center space-x-4">
+            <img :src="lead.avatar" :alt="lead.name" class="h-16 w-16 rounded-full" />
+            <div class="flex-1">
+              <h3 class="text-xl font-medium text-gray-900">{{ lead.name }}</h3>
+              <p class="text-base text-gray-600">{{ lead.position }} at {{ lead.company }}</p>
+              <p class="text-purple-600 mt-1">{{ lead.email }}</p>
+              <div class="flex items-center text-gray-500 mt-1">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>{{ lead.location }}</span>
+              </div>
+            </div>
+            <div class="flex space-x-3">
+              <a v-if="lead.linkedin" :href="lead.linkedin" target="_blank" 
+                 class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center hover:bg-blue-100">
+                <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+              </a>
+              <a v-if="lead.twitter" :href="lead.twitter" target="_blank" 
+                 class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100">
+                <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
 
-                      <!-- 社交媒体链接 -->
-                      <div class="flex space-x-4">
-                        <a
-                          href="#"
-                          class="text-gray-400 hover:text-gray-500"
-                        >
-                          <img src="@/assets/linkedin.svg" alt="LinkedIn" class="h-6 w-6" />
-                        </a>
-                        <a
-                          href="#"
-                          class="text-gray-400 hover:text-gray-500"
-                        >
-                          <img src="@/assets/twitter.svg" alt="Twitter" class="h-6 w-6" />
-                        </a>
-                      </div>
+        <!-- About Person -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">About {{ lead.name.split(' ')[0] }}</h2>
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <div class="flex items-center mb-3">
+                <h3 class="text-gray-600">Interests</h3>
+                <span class="ml-2 px-2 py-1 text-xs bg-purple-100 text-purple-600 rounded-full">Scraped from X</span>
+              </div>
+              <p class="text-gray-700">{{ lead.interests }}</p>
+            </div>
+            <div>
+              <div class="flex items-center mb-3">
+                <h3 class="text-gray-600">Insights</h3>
+                <span class="ml-2 px-2 py-1 text-xs bg-purple-100 text-purple-600 rounded-full">Scraped from LinkedIn</span>
+              </div>
+              <p class="text-gray-700">{{ lead.insights }}</p>
+            </div>
+          </div>
+        </div>
 
-                      <!-- About -->
-                      <div>
-                        <h4 class="text-sm font-medium text-gray-900">About {{ lead.name }}</h4>
-                        <div class="mt-2">
-                          <h5 class="text-xs font-medium text-gray-500">Interests</h5>
-                          <div class="mt-1 flex flex-wrap gap-2">
-                            <span
-                              v-for="interest in lead.interests"
-                              :key="interest"
-                              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
-                            >
-                              {{ interest }}
-                            </span>
-                          </div>
-                        </div>
-                        <div class="mt-4">
-                          <h5 class="text-xs font-medium text-gray-500">Insights</h5>
-                          <p class="mt-1 text-sm text-gray-600">
-                            {{ lead.insights }}
-                          </p>
-                        </div>
-                      </div>
+        <!-- About Company -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">About {{ lead.company }}</h2>
+          <div class="grid grid-cols-4 gap-6">
+            <div>
+              <h3 class="text-purple-600 mb-2">Headcount</h3>
+              <p class="text-gray-700 text-lg">{{ lead.companyInfo.headcount }}</p>
+            </div>
+            <div>
+              <h3 class="text-purple-600 mb-2">Funding Stage</h3>
+              <p class="text-gray-700 text-lg">{{ lead.companyInfo.fundingStage }}</p>
+            </div>
+            <div>
+              <h3 class="text-purple-600 mb-2">Revenue</h3>
+              <p class="text-gray-700 text-lg">{{ lead.companyInfo.revenue }}</p>
+            </div>
+            <div>
+              <h3 class="text-purple-600 mb-2">Website</h3>
+              <a :href="lead.companyInfo.website" target="_blank" class="text-blue-600 hover:underline text-lg">
+                {{ lead.companyInfo.website.replace('https://', '') }}
+              </a>
+            </div>
+          </div>
+        </div>
 
-                      <!-- Company Info -->
-                      <div>
-                        <h4 class="text-sm font-medium text-gray-900">About {{ lead.company }}</h4>
-                        <dl class="mt-2 grid grid-cols-2 gap-4">
-                          <div>
-                            <dt class="text-xs font-medium text-gray-500">Headcount</dt>
-                            <dd class="mt-1 text-sm text-gray-900">{{ lead.companySize }}</dd>
-                          </div>
-                          <div>
-                            <dt class="text-xs font-medium text-gray-500">Funding</dt>
-                            <dd class="mt-1 text-sm text-gray-900">{{ lead.funding }}</dd>
-                          </div>
-                          <div>
-                            <dt class="text-xs font-medium text-gray-500">Revenue</dt>
-                            <dd class="mt-1 text-sm text-gray-900">{{ lead.revenue }}</dd>
-                          </div>
-                          <div>
-                            <dt class="text-xs font-medium text-gray-500">Website</dt>
-                            <dd class="mt-1 text-sm text-gray-900">
-                              <a :href="lead.website" class="text-primary hover:text-primary-dark">
-                                {{ lead.website }}
-                              </a>
-                            </dd>
-                          </div>
-                        </dl>
-                      </div>
+        <!-- Tech Stack -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Tech Stack</h2>
+          <div class="flex flex-wrap gap-4">
+            <div v-for="tech in lead.techStack" :key="tech.name" 
+                 class="w-16 h-16 rounded-lg flex flex-col items-center justify-center"
+                 :class="tech.bgColor">
+              <img :src="tech.icon" :alt="tech.name" class="w-10 h-10" />
+              <span class="text-xs text-gray-600 mt-1">{{ tech.name }}</span>
+            </div>
+          </div>
+        </div>
 
-                      <!-- Tech Stack -->
-                      <div>
-                        <h4 class="text-sm font-medium text-gray-900">Tech Stack</h4>
-                        <div class="mt-2 flex flex-wrap gap-2">
-                          <img
-                            v-for="tech in lead.techStack"
-                            :key="tech"
-                            :src="'@/assets/tech/' + tech + '.svg'"
-                            :alt="tech"
-                            class="h-8 w-8"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </DialogPanel>
-            </TransitionChild>
+        <!-- Workflow Stage -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Current Status</h2>
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="px-3 py-1 text-sm rounded-full" :class="getStageClass(lead.stage)">
+                {{ lead.stage }}
+              </span>
+            </div>
+            <div class="flex items-center">
+              <div class="h-3 w-3 rounded-full mr-2" :class="lead.active ? 'bg-green-500' : 'bg-gray-300'"></div>
+              <span class="text-sm text-gray-600">{{ lead.active ? 'Active' : 'Inactive' }}</span>
+            </div>
           </div>
         </div>
       </div>
-    </Dialog>
-  </TransitionRoot>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessui/vue'
-import {
-  XMarkIcon,
-  EnvelopeIcon,
-  MapPinIcon
-} from '@heroicons/vue/24/outline'
-
-interface Props {
-  isOpen: boolean
-  lead: any
+interface TechStack {
+  name: string
+  icon: string
+  bgColor: string
 }
 
-const props = defineProps<Props>()
-const emit = defineEmits(['close'])
-
-const close = () => {
-  emit('close')
+interface CompanyInfo {
+  headcount: string
+  fundingStage: string
+  revenue: string
+  website: string
 }
-</script> 
+
+interface Lead {
+  id: number
+  name: string
+  email: string
+  avatar: string
+  position: string
+  company: string
+  location: string
+  linkedin?: string
+  twitter?: string
+  interests: string
+  insights: string
+  companyInfo: CompanyInfo
+  techStack: TechStack[]
+  stage: string
+  active: boolean
+}
+
+const props = defineProps<{
+  lead: Lead
+  show: boolean
+}>()
+
+defineEmits<{
+  (e: 'close'): void
+}>()
+
+// 工作流阶段样式
+const getStageClass = (stage: string): string => {
+  const classes = {
+    'New Lead': 'bg-blue-100 text-blue-800',
+    'Contacted': 'bg-yellow-100 text-yellow-800',
+    'Engaged': 'bg-indigo-100 text-indigo-800',
+    'Qualified': 'bg-green-100 text-green-800',
+    'Nurturing': 'bg-purple-100 text-purple-800',
+    'Negotiating': 'bg-orange-100 text-orange-800',
+    'Closed Won': 'bg-emerald-100 text-emerald-800',
+    'Closed Lost': 'bg-gray-100 text-gray-800'
+  }
+  return classes[stage] || 'bg-gray-100 text-gray-800'
+}
+</script>
+
+<style scoped>
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+</style> 

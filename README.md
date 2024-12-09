@@ -1,118 +1,113 @@
 # SDRobot - 智能销售线索管理系统
 
-一个现代化的销售线索(Leads)管理系统，帮助销售和市场营销人员高效管理潜在客户。
+SDRobot 是一个现代化的销售线索（Leads）管理系统，帮助销售团队更高效地管理和跟进潜在客户。
 
-## 技术栈
+## 功能特点
 
-- **前端框架**: Vue 3 + TypeScript + Vite
-- **UI 框架**: Tailwind CSS
-- **状态管理**: Pinia
-- **路由管理**: Vue Router 4
-- **HTTP 客户端**: Axios
-- **图标库**: Heroicons
+### 1. 线索管理
+- 线索列表展示与分页
+- 高级搜索功能（支持按名称、邮箱、公司搜索）
+- 批量选择操作
+- 每页显示 5 条记录
 
-## 功能特性
+### 2. 工作流程状态
+线索状态分为以下几个阶段：
+- `NEW`: 新线索（非活跃）
+- `CONTACTED`: 已联系（活跃）
+- `ENGAGED`: 已回应（活跃）
+- `QUALIFIED`: 已确认（活跃）
+- `NURTURING`: 培育中（活跃）
+- `NEGOTIATING`: 谈判中（活跃）
+- `CLOSED_WON`: 已成交（非活跃）
+- `CLOSED_LOST`: 已流失（非活跃）
 
-### 1. 界面布局
-- 现代化三列布局设计
-  - 左侧导航菜单
-  - 中间内容区域
-  - 右侧详情面板
+### 3. 线索详情
+每条线索包含以下信息：
+- 基本信息（姓名、职位、公司、邮箱、位置）
+- 社交媒体链接（LinkedIn、Twitter）
+- 兴趣和洞察
+- 公司信息（员工数量、融资阶段、收入、网站）
+- 技术栈
+- 当前状态和活跃度
 
-### 2. 核心功能
-- **Dashboard**: 数据概览
-  - 总线索数量
-  - 活跃营销活动
-  - 转化率统计
-- **Leads 管理**
-  - 线索列表展示
-  - 详细信息查看
-  - 状态追踪
-- **营销活动**
-  - 活动管理
-  - 效果分析
-- **智能助手**
-  - AI 对话支持
-  - 自动化建议
+### 4. 技术栈展示
+支持显示的技术包括：
+- React
+- Node.js
+- Vue.js
+- Python
+- TensorFlow
+- Docker
+- Jenkins
+- AWS
 
-### 3. 集成功能
-- 社交媒体数据采集
-- 邮箱系统集成
-- 数据分析工具
+## 技术实现
 
-## 开发环境设置
+### 前端技术栈
+- Vue 3
+- TypeScript
+- Tailwind CSS
+- Vue Router
+- Vue I18n（国际化支持）
+- Headless UI 组件
 
-### 前置要求
-- Node.js >= 16.0.0
-- npm >= 8.0.0
+### 主要功能实现
+1. **列表管理**
+   - 分页实现
+   - 批量选择
+   - 搜索过滤
 
-### 安装步骤
+2. **状态管理**
+   - 工作流程状态自动关联活跃状态
+   - 状态颜色编码
+   - 状态转换逻辑
 
-1. 克隆项目
-```bash
-git clone [repository-url]
-cd sdrobot
-```
+3. **详情展示**
+   - 右侧抽屉式面板
+   - 响应式布局
+   - 滚动优化
 
-2. 安装依赖
-```bash
-npm install
-```
-
-3. 启动开发服务器
-```bash
-npm run dev
-```
-
-4. 构建生产版本
-```bash
-npm run build
-```
+4. **数据展示**
+   - 智能时间格式化
+   - 技术栈图标展示
+   - 数据自动补全
 
 ## 项目结构
 ```
 src/
-├── assets/        # 静态资源
-├── components/    # 通用组件
-├── layouts/       # 布局组件
-├── views/         # 页面组件
-├── router/        # 路由配置
-├── store/         # 状态管理
-├── types/         # TypeScript 类型定义
-└── utils/         # 工具函数
+├── assets/
+│   ├── tech/          # 技术栈图标
+│   └── ...
+├── components/
+│   └── LeadDetailsPanel.vue  # 线索详情面板
+├── views/
+│   └── Leads.vue      # 线索列表页面
+├── i18n.ts            # 国际化配置
+└── ...
 ```
 
-## 开发规范
+## 开发计划
+- [x] 基础列表功能
+- [x] 工作流程状态管理
+- [x] 详情面板实现
+- [x] 技术栈展示
+- [ ] 数据编辑功能
+- [ ] 数据导入/导出
+- [ ] 团队协作功能
+- [ ] 数据分析报表
 
-### 代码风格
-- 使用 TypeScript 强类型
-- Vue 3 Composition API
-- Tailwind CSS 原子化 CSS
+## 使用说明
+1. 列表页面：
+   - 点击记录查看详情
+   - 使用搜索框过滤数据
+   - 使用复选框进行批量操作
 
-### Git 提交规范
-- feat: 新功能
-- fix: 修复问题
-- docs: 文档修改
-- style: 代码格式修改
-- refactor: 代码重构
-- test: 测试用例修改
-- chore: 其他修改
+2. 详情面板：
+   - 查看完整的线索信息
+   - 社交媒体快速访问
+   - 技术栈可视化展示
 
-## 浏览器支持
-
-- Chrome >= 87
-- Firefox >= 78
-- Safari >= 14
-- Edge >= 88
-
-## 贡献指南
-
-1. Fork 项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交修改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 提交 Pull Request
-
-## 许可证
-
-[MIT License](LICENSE)
+## 注意事项
+1. 活跃状态自动根据工作流程状态判断
+2. 技术栈图标需要提前准备
+3. 时间显示会根据距今时间自动调整格式

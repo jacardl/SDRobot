@@ -14,7 +14,11 @@ export default {
   toolbar: {
     help: '帮助中心',
     settings: '设置',
-    language: '语言'
+    language: '语言',
+    greeting: '你好 👋',
+    askMe: '随便问！',
+    monthlyTarget: '月目标',
+    emailsInQueue: '邮件队列'
   },
   account: {
     profile: '个人资料',

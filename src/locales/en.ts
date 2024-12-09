@@ -14,7 +14,11 @@ export default {
   toolbar: {
     help: 'Help Center',
     settings: 'Settings',
-    language: 'Language'
+    language: 'Language',
+    greeting: 'Hey there 👋',
+    askMe: 'Ask me anything!',
+    monthlyTarget: 'Monthly Target',
+    emailsInQueue: 'Emails In Queue'
   },
   account: {
     profile: 'Profile',

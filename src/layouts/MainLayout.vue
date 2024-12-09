@@ -55,139 +55,8 @@
 
     <!-- 右侧内容区 -->
     <div class="flex-1 flex flex-col">
-      <!-- 顶部工具栏 -->
-      <div class="h-16 bg-white border-b border-gray-200 flex items-center justify-end px-6 gap-2">
-        <!-- 帮助中心 -->
-        <button 
-          @click="showHelp"
-          class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg flex items-center"
-        >
-          <QuestionMarkCircleIcon class="h-5 w-5" />
-          <span class="ml-2">{{ t('toolbar.help') }}</span>
-        </button>
-
-        <!-- 设置中心 -->
-        <button 
-          @click="showSettings"
-          class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg flex items-center"
-        >
-          <Cog6ToothIcon class="h-5 w-5" />
-          <span class="ml-2">{{ t('toolbar.settings') }}</span>
-        </button>
-
-        <!-- 语言切换 -->
-        <Menu as="div" class="relative">
-          <MenuButton
-            class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg flex items-center"
-          >
-            <LanguageIcon class="h-5 w-5" />
-            <span class="ml-2">{{ t('toolbar.language') }}</span>
-            <ChevronDownIcon class="h-4 w-4 ml-1" />
-          </MenuButton>
-
-          <transition
-            enter-active-class="transition duration-100 ease-out"
-            enter-from-class="transform scale-95 opacity-0"
-            enter-to-class="transform scale-100 opacity-100"
-            leave-active-class="transition duration-75 ease-in"
-            leave-from-class="transform scale-100 opacity-100"
-            leave-to-class="transform scale-95 opacity-0"
-          >
-            <MenuItems
-              class="absolute right-0 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-            >
-              <div class="py-1">
-                <MenuItem v-slot="{ active }">
-                  <a
-                    @click="changeLanguage('zh')"
-                    :class="[
-                      active ? 'bg-gray-100' : '',
-                      'block px-4 py-2 text-sm text-gray-700 cursor-pointer'
-                    ]"
-                  >
-                    中文
-                  </a>
-                </MenuItem>
-                <MenuItem v-slot="{ active }">
-                  <a
-                    @click="changeLanguage('en')"
-                    :class="[
-                      active ? 'bg-gray-100' : '',
-                      'block px-4 py-2 text-sm text-gray-700 cursor-pointer'
-                    ]"
-                  >
-                    English
-                  </a>
-                </MenuItem>
-              </div>
-            </MenuItems>
-          </transition>
-        </Menu>
-
-        <!-- 账户中心 -->
-        <Menu as="div" class="relative">
-          <MenuButton
-            class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg flex items-center"
-          >
-            <img
-              src="@/assets/user-avatar.svg"
-              alt="User avatar"
-              class="h-8 w-8 rounded-full"
-            />
-            <span class="ml-2">{{ userName }}</span>
-            <ChevronDownIcon class="h-4 w-4 ml-1" />
-          </MenuButton>
-
-          <transition
-            enter-active-class="transition duration-100 ease-out"
-            enter-from-class="transform scale-95 opacity-0"
-            enter-to-class="transform scale-100 opacity-100"
-            leave-active-class="transition duration-75 ease-in"
-            leave-from-class="transform scale-100 opacity-100"
-            leave-to-class="transform scale-95 opacity-0"
-          >
-            <MenuItems
-              class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-            >
-              <div class="py-1">
-                <MenuItem v-slot="{ active }">
-                  <a
-                    @click="showProfile"
-                    :class="[
-                      active ? 'bg-gray-100' : '',
-                      'block px-4 py-2 text-sm text-gray-700 cursor-pointer'
-                    ]"
-                  >
-                    {{ t('account.profile') }}
-                  </a>
-                </MenuItem>
-                <MenuItem v-slot="{ active }">
-                  <a
-                    @click="showSettings"
-                    :class="[
-                      active ? 'bg-gray-100' : '',
-                      'block px-4 py-2 text-sm text-gray-700 cursor-pointer'
-                    ]"
-                  >
-                    {{ t('account.settings') }}
-                  </a>
-                </MenuItem>
-                <MenuItem v-slot="{ active }">
-                  <a
-                    @click="logout"
-                    :class="[
-                      active ? 'bg-gray-100' : '',
-                      'block px-4 py-2 text-sm text-gray-700 cursor-pointer'
-                    ]"
-                  >
-                    {{ t('account.logout') }}
-                  </a>
-                </MenuItem>
-              </div>
-            </MenuItems>
-          </transition>
-        </Menu>
-      </div>
+      <!-- 顶部状态栏 -->
+      <TopStatusBar />
 
       <!-- 主要内容区域 -->
       <div class="flex-1 overflow-auto">
@@ -202,6 +71,7 @@ import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import TopStatusBar from '@/components/TopStatusBar.vue'
 import {
   HomeIcon,
   ChatBubbleLeftRightIcon,

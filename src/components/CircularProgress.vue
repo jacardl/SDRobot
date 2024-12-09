@@ -1,27 +1,27 @@
 <template>
-  <div class="relative w-8 h-8">
+  <div class="relative w-6 h-6">
     <!-- 背景圆环 -->
-    <svg class="w-full h-full transform -rotate-90">
+    <svg class="w-6 h-6 transform -rotate-90">
       <circle
-        cx="16"
-        cy="16"
-        r="14"
-        stroke-width="2.5"
+        cx="12"
+        cy="12"
+        r="10"
         stroke="currentColor"
+        stroke-width="2"
         fill="none"
         class="text-gray-200"
       />
       <!-- 进度圆环 -->
       <circle
-        cx="16"
-        cy="16"
-        r="14"
-        stroke-width="2.5"
-        :stroke-dasharray="strokeDasharray"
-        :stroke-dashoffset="strokeDashoffset"
+        cx="12"
+        cy="12"
+        r="10"
         stroke="currentColor"
+        stroke-width="2"
         fill="none"
-        class="text-purple-500 transition-all duration-300 ease-in-out"
+        :stroke-dasharray="circumference"
+        :stroke-dashoffset="dashOffset"
+        class="text-primary transition-all duration-300"
       />
     </svg>
   </div>
@@ -34,9 +34,12 @@ const props = defineProps<{
   value: number // 0-100 之间的进度值
 }>()
 
-const circumference = 2 * Math.PI * 14 // 圆的周长
-const strokeDasharray = computed(() => `${circumference} ${circumference}`)
-const strokeDashoffset = computed(() => 
-  circumference - (props.value / 100) * circumference
-)
+const circumference = 2 * Math.PI * 10 // 圆的周长
+const strokeDasharray = computed(() => circumference)
+const dashOffset = computed(() => {
+  // 确保值在0-100之间
+  const clampedValue = Math.min(Math.max(props.value, 0), 100)
+  // 计算偏移量，保留两位小数
+  return Number((circumference - (clampedValue / 100) * circumference).toFixed(2))
+})
 </script> 

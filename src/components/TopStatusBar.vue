@@ -7,7 +7,7 @@
     >
       <!-- 左侧欢迎区域 -->
       <div class="flex items-center">
-        <img class="h-8 w-8 rounded-full" src="@/assets/user-avatar.svg" alt="User Avatar" />
+        <img class="h-8 w-8 rounded-full" src="@/assets/jj-avatar.svg" alt="JJ Avatar" />
         <span class="ml-2 text-gray-700 group-hover:text-gray-900">{{ t('toolbar.greeting') }}</span>
       </div>
 
@@ -36,26 +36,26 @@
     <div class="flex items-center">
       <!-- 月度目标 -->
       <div class="flex items-center space-x-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-500" viewBox="0 0 20 20" fill="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
           <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
         </svg>
         <span class="text-gray-600">{{ t('toolbar.monthlyTarget') }}</span>
         <div class="flex items-center">
-          <span class="text-purple-600">2287</span>
+          <span class="text-primary">2287</span>
           <span class="text-gray-400">/</span>
           <span class="text-gray-600">3000</span>
         </div>
-        <CircularProgress :value="76" />
+        <CircularProgress :value="76.23" />
       </div>
 
       <!-- 邮件队列 -->
       <div class="flex items-center space-x-2 ml-8">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-500" viewBox="0 0 20 20" fill="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
           <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
           <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
         </svg>
         <span class="text-gray-600">{{ t('toolbar.emailsInQueue') }}</span>
-        <span class="text-purple-600">3662</span>
+        <span class="text-primary">3662</span>
       </div>
 
       <!-- 分隔线 -->

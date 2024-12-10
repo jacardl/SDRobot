@@ -239,8 +239,45 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { PencilIcon } from '@heroicons/vue/24/outline'
 
+interface Lead {
+  id: number
+  name: string
+  email: string
+  position: string
+  company: string
+  phone: string
+  location: string
+  linkedin?: string
+  twitter?: string
+  about: string
+  avatar: string
+  companyInfo: {
+    headcount: string
+    industry: string
+    revenue: string
+    website: string
+  }
+  notes: Array<{
+    id: number
+    author: {
+      name: string
+      avatar: string
+    }
+    date: string
+    content: string
+  }>
+  emails: Array<{
+    id: number
+    subject: string
+    date: string
+    status: string
+    preview: string
+  }>
+}
+
 const router = useRouter()
 const route = useRoute()
+const lead = ref<Lead | null>(null)
 
 // Tab 配置
 const tabs = [
@@ -250,14 +287,13 @@ const tabs = [
 ]
 
 const currentTab = ref('about')
-const lead = ref(null)
 const showEmailComposer = ref(false)
 const newEmail = ref({
   subject: '',
   message: ''
 })
 
-// 处理撰写���件
+// 处理撰写邮件
 const handleComposeEmail = () => {
   currentTab.value = 'emails'
   showEmailComposer.value = true
@@ -266,10 +302,12 @@ const handleComposeEmail = () => {
 // 发送邮件
 const sendEmail = () => {
   // TODO: 实现发送邮件的逻辑
+  if (!lead.value) return
+  
   lead.value.emails.unshift({
     id: Date.now(),
     subject: newEmail.value.subject,
-    date: 'Just now',
+    date: 'Just now', 
     status: 'sent',
     preview: newEmail.value.message
   })

@@ -71,14 +71,13 @@
                 </div>
               </div>
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              <div class="flex items-center gap-1 group relative">
-                Status
-                <InformationCircleIcon class="h-4 w-4 text-gray-400 cursor-help" />
-                <div class="hidden group-hover:block absolute left-0 top-6 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-10">
-                  Current status and any issues that need attention
-                </div>
-              </div>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative">
+              Status
+              <button class="ml-1 text-gray-400 hover:text-gray-500">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div class="flex items-center gap-1 group relative">
@@ -141,13 +140,24 @@
                 </div>
               </div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="px-6 py-4 whitespace-nowrap relative">
               <div 
-                class="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium"
-                :class="getStatusClass(mailbox.status)"
+                class="flex items-center space-x-1 cursor-help" 
+                ref="statusRef"
+                @mouseenter="showTooltip(mailbox, $event)" 
+                @mouseleave="hideTooltip"
               >
-                <component :is="getStatusIcon(mailbox.status)" class="h-4 w-4 mr-1" />
-                {{ mailbox.status }}
+                <div 
+                  class="px-3 py-1 rounded-full text-sm font-medium"
+                  :class="getStatusClass(mailbox.status)"
+                >
+                  {{ mailbox.status }}
+                </div>
+                <MailboxStatusTooltip 
+                  v-if="hoveredMailbox === mailbox.email"
+                  :mailbox="mailbox"
+                  :trigger-ref="tooltipTriggerRef"
+                />
               </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
@@ -336,10 +346,14 @@ import {
 import { useMailboxStore } from '@/stores/mailbox'
 import { type Mailbox } from '@/data/mailboxData'
 import { mailboxService } from '@/services/mailbox'
+import CircleProgress from '@/components/CircleProgress.vue'
+import MailboxStatusTooltip from '@/components/MailboxStatusTooltip.vue'
 
 const mailboxStore = useMailboxStore()
 const showAddMailboxModal = ref(false)
 const mailboxToDisconnect = ref<Mailbox | null>(null)
+const hoveredMailbox = ref<string | null>(null)
+const tooltipTriggerRef = ref<HTMLElement | undefined>(undefined)
 
 // 连接Gmail
 const connectGmail = async () => {
@@ -392,6 +406,16 @@ const getHealthColor = (health: number) => {
   if (health >= 80) return '#16A34A' // green-600
   if (health >= 60) return '#CA8A04' // yellow-600
   return '#DC2626' // red-600
+}
+
+const showTooltip = (mailbox: any, event: MouseEvent) => {
+  hoveredMailbox.value = mailbox.email
+  tooltipTriggerRef.value = event.currentTarget as HTMLElement
+}
+
+const hideTooltip = () => {
+  hoveredMailbox.value = null
+  tooltipTriggerRef.value = undefined
 }
 
 // 初始化

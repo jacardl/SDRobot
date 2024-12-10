@@ -14,6 +14,62 @@ interface GoogleUserInfo {
   picture: string
 }
 
+interface Mailbox {
+  email: string
+  dailyEmailCapacity: number
+  status: 'Urgent Issues' | 'Warning' | 'Healthy'
+  health: number
+  isActive: boolean
+  spf: boolean
+  dmarc: boolean
+  dkim: boolean
+  rdns: boolean
+  aRecord: boolean
+  mxRecord: boolean
+}
+
+const mailboxes: Mailbox[] = [
+  {
+    email: 'jaspar@sdrobot.com',
+    dailyEmailCapacity: 75,
+    status: 'Urgent Issues',
+    health: 60,
+    isActive: true,
+    spf: false,
+    dmarc: false,
+    dkim: true,
+    rdns: true,
+    aRecord: true,
+    mxRecord: true
+  },
+  {
+    email: 'jasparcarjack@sdrobot.com',
+    dailyEmailCapacity: 70,
+    status: 'Warning',
+    health: 75,
+    isActive: true,
+    spf: true,
+    dmarc: false,
+    dkim: true,
+    rdns: true,
+    aRecord: true,
+    mxRecord: true
+  },
+  {
+    email: 'jasparcj@sdrobot.com',
+    dailyEmailCapacity: 75,
+    status: 'Healthy',
+    health: 90,
+    isActive: true,
+    spf: true,
+    dmarc: true,
+    dkim: true,
+    rdns: true,
+    aRecord: true,
+    mxRecord: true
+  }
+]
+
 export class MailboxService {
   private accessToken: string | null = null
   private email: string | null = null
@@ -56,7 +112,7 @@ export class MailboxService {
       const userInfo = await this.getUserInfo()
       this.email = userInfo.email
 
-      // ���存凭证
+      // 存凭证
       if (this.accessToken && this.email && tokenResponse.data.refresh_token) {
         localStorage.setItem('gmail_access_token', this.accessToken)
         localStorage.setItem('gmail_email', this.email)
@@ -135,6 +191,28 @@ export class MailboxService {
     localStorage.removeItem('gmail_access_token')
     localStorage.removeItem('gmail_email')
     localStorage.removeItem('gmail_refresh_token')
+  }
+
+  getMailboxes() {
+    return mailboxes
+  }
+  
+  addMailbox(mailbox: Mailbox) {
+    mailboxes.push(mailbox)
+  }
+  
+  removeMailbox(email: string) {
+    const index = mailboxes.findIndex(m => m.email === email)
+    if (index !== -1) {
+      mailboxes.splice(index, 1)
+    }
+  }
+  
+  updateMailbox(email: string, updates: Partial<Mailbox>) {
+    const mailbox = mailboxes.find(m => m.email === email)
+    if (mailbox) {
+      Object.assign(mailbox, updates)
+    }
   }
 }
 

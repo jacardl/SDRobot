@@ -1,7 +1,6 @@
-//import { defineStore } from 'pinia'
+import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { mailboxService } from '@/services/mailbox'
-import { defineStore } from 'pinia'
 import { 
   type Mailbox, 
   defaultMailboxes, 

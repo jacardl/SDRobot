@@ -1,9 +1,19 @@
+export interface MailboxStatus {
+  spf: boolean
+  dmarc: boolean
+  dkim: boolean
+  rdns: boolean
+  aRecord: boolean
+  mxRecord: boolean
+}
+
 export interface Mailbox {
   email: string
   capacity: number
   enabled: boolean
   status: 'Healthy' | 'Warning' | 'Urgent Issues'
   health: number // 0-100
+  statusChecks: MailboxStatus
 }
 
 // 默认邮箱数据
@@ -13,21 +23,45 @@ export const defaultMailboxes: Mailbox[] = [
     capacity: 75,
     enabled: true,
     status: 'Urgent Issues',
-    health: 60
+    health: 60,
+    statusChecks: {
+      spf: false,
+      dmarc: false,
+      dkim: true,
+      rdns: true,
+      aRecord: true,
+      mxRecord: true
+    }
   },
   {
     email: 'jasparcarjack@sdrobot.com',
     capacity: 70,
     enabled: true,
     status: 'Warning',
-    health: 75
+    health: 75,
+    statusChecks: {
+      spf: true,
+      dmarc: false,
+      dkim: true,
+      rdns: true,
+      aRecord: true,
+      mxRecord: true
+    }
   },
   {
     email: 'jasparcj@sdrobot.com',
     capacity: 75,
     enabled: true,
     status: 'Healthy',
-    health: 90
+    health: 90,
+    statusChecks: {
+      spf: true,
+      dmarc: true,
+      dkim: true,
+      rdns: true,
+      aRecord: true,
+      mxRecord: true
+    }
   }
 ]
 
@@ -51,6 +85,14 @@ export function createDefaultMailbox(email: string): Mailbox {
     capacity: 75,
     enabled: true,
     status: 'Healthy',
-    health: 90
+    health: 90,
+    statusChecks: {
+      spf: true,
+      dmarc: true,
+      dkim: true,
+      rdns: true,
+      aRecord: true,
+      mxRecord: true
+    }
   }
 } 

@@ -174,7 +174,7 @@ defineEmits<{
 
 // 工作流阶段样式
 const getStageClass = (stage: string): string => {
-  const classes = {
+  const classes: Record<string, string> = {
     'New Lead': 'bg-blue-100 text-blue-800',
     'Contacted': 'bg-yellow-100 text-yellow-800',
     'Engaged': 'bg-indigo-100 text-indigo-800',

@@ -145,8 +145,20 @@
     <!-- 右侧抽屉 -->
     <LeadDetailsPanel 
       v-if="selectedLead"
-      :lead="selectedLead"
-      :show="showDetailsPanel"
+      :lead="{
+        ...selectedLead,
+        location: '',
+        interests: '',
+        insights: '',
+        companyInfo: {
+          headcount: '',
+          fundingStage: '',
+          revenue: '',
+          website: ''
+        },
+        techStack: []
+      }"
+      :show="showDetailsPanel" 
       @close="closeLeadDetails"
     />
   </div>
@@ -365,13 +377,13 @@ const getStageClass = (stage: WorkflowStage): string => {
 // 判断是否处于活跃状态
 const isActive = (stage: WorkflowStage): boolean => {
   const activeStages = [
+    WORKFLOW_STAGES.CONTACTED,
     WORKFLOW_STAGES.ENGAGED,
     WORKFLOW_STAGES.QUALIFIED,
     WORKFLOW_STAGES.NURTURING,
-    WORKFLOW_STAGES.NEGOTIATING,
-    WORKFLOW_STAGES.CONTACTED
-  ]
-  return activeStages.includes(stage)
+    WORKFLOW_STAGES.NEGOTIATING
+  ] as const
+  return activeStages.includes(stage as typeof activeStages[number])
 }
 
 // 更新日期格式化函数
@@ -498,8 +510,7 @@ const enrichLeadData = (lead: Lead) => {
 
     const defaultInterests = 'Technology, Innovation, Professional Growth'
     const defaultInsights = 'Exploring industry solutions'
-
-    const roleType = Object.keys(positionMap).find(role => position.includes(role))
+    const roleType = Object.keys(positionMap).find(role => position.includes(role)) as keyof typeof positionMap | undefined
     return roleType ? positionMap[roleType] : { interests: defaultInterests, insights: defaultInsights }
   }
 
@@ -508,7 +519,7 @@ const enrichLeadData = (lead: Lead) => {
   const companyInfo = companyScaleMap[companySize]
   const socialLinks = generateSocialLinks(lead.name)
   const { interests, insights } = generateInterestsAndInsights(lead.position)
-  const techStack = techStackMap[lead.company] || ['React', 'Node', 'Vue']
+  const techStack = techStackMap[lead.company as keyof typeof techStackMap] || ['React', 'Node', 'Vue']
 
   const techStackColors = {
     'React': 'bg-blue-100',
@@ -535,10 +546,64 @@ const enrichLeadData = (lead: Lead) => {
     techStack: techStack.map(tech => ({
       name: tech,
       icon: `/src/assets/tech/${tech.toLowerCase()}.svg`,
-      bgColor: techStackColors[tech] || 'bg-gray-100'
+      bgColor: techStackColors[tech as keyof typeof techStackColors] || 'bg-gray-100'
     })),
     active: isActive(lead.stage)
   }
+}
+
+const showDetailsPanel = ref(false)
+const selectedLead = ref<Lead | null>(null)
+
+// 添加类型定义
+interface PositionMap {
+  [key: string]: {
+    interests: string
+    insights: string
+  }
+}
+
+interface TechStackMap {
+  [key: string]: string[]
+}
+
+interface TechStackColors {
+  [key: string]: string
+}
+
+const positionMap: PositionMap = {
+  CTO: {
+    interests: 'Technical architecture, scalability, innovation',
+    insights: 'Focus on technical benefits and ROI'
+  },
+  // ... rest of the position map
+}
+
+const techStackMap: TechStackMap = {
+  'AI Innovations': ['Python', 'TensorFlow', 'React'],
+  'Cloud Solutions Pro': ['AWS', 'Docker', 'Node'],
+  'DevOps Cloud': ['Docker', 'Jenkins', 'Node'],
+  'Blockchain Solutions': ['React', 'Node', 'Vue'],
+  'EdTech Innovations': ['React', 'Node', 'Vue'],
+  'FinTech Solutions': ['React', 'Node', 'Vue'],
+  'GameDev Studio': ['React', 'Node', 'Vue'],
+  'HealthTech Systems': ['React', 'Node', 'Vue'],
+  'IoT Technologies': ['React', 'Node', 'Vue'],
+  'MLOps Solutions': ['Python', 'TensorFlow', 'React'],
+  'Quantum Technologies': ['Python', 'React', 'Node'],
+  'Robotics Innovation': ['Python', 'React', 'Node'],
+  'VR Systems': ['React', 'Node', 'Vue']
+}
+
+const techStackColors: TechStackColors = {
+  'React': 'bg-blue-100',
+  'Node': 'bg-green-100',
+  'Vue': 'bg-emerald-100',
+  'Python': 'bg-yellow-100',
+  'TensorFlow': 'bg-orange-100',
+  'Docker': 'bg-blue-100',
+  'Jenkins': 'bg-red-100',
+  'AWS': 'bg-orange-100'
 }
 </script>
 

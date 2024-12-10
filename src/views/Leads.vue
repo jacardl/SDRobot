@@ -120,17 +120,17 @@
           Previous
         </button>
         <button 
-          v-for="page in pageNumbers" 
-          :key="page"
+          v-for="(page, index) in paginationButtons" 
+          :key="index"
           class="min-w-[32px] px-2 py-1 border rounded-md"
           :class="[
-            page === -1 ? 'border-transparent' : 'hover:bg-gray-50',
+            typeof page === 'string' ? 'border-transparent cursor-default' : 'hover:bg-gray-50',
             page === currentPage ? 'bg-primary text-white border-primary' : 'text-gray-700'
           ]"
-          @click="page !== -1 && (currentPage = page)"
-          :disabled="page === -1"
+          @click="typeof page === 'number' && (currentPage = page)"
+          :disabled="typeof page === 'string'"
         >
-          {{ page === -1 ? '...' : page }}
+          {{ page }}
         </button>
         <button 
           class="px-3 py-1 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -147,16 +147,14 @@
       v-if="selectedLead"
       :lead="{
         ...selectedLead,
-        location: '',
-        interests: '',
-        insights: '',
+        location: selectedLead.location || '',
         companyInfo: {
-          headcount: '',
-          fundingStage: '',
+          headcount: selectedLead.companyInfo?.headcount || '',
+          fundingStage: selectedLead.companyInfo?.fundingStage || '',
           revenue: '',
-          website: ''
-        },
-        techStack: []
+          website: '',
+          industry: selectedLead.companyInfo?.industry || ''
+        }
       }"
       :show="showDetailsPanel" 
       @close="closeLeadDetails"
@@ -169,130 +167,21 @@ import { ref, computed, watch } from 'vue'
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import LeadDetailsPanel from '../components/LeadDetailsPanel.vue'
 import { useRouter } from 'vue-router'
-
-interface Lead {
-  id: number
-  name: string
-  email: string
-  avatar: string
-  stage: WorkflowStage
-  company: string
-  position: string
-  active: boolean
-  lastContact: Date
-}
-
-// 工作流阶段定义
-const WORKFLOW_STAGES = {
-  NEW: 'New Lead',          // 新线索，初始状态
-  CONTACTED: 'Contacted',   // 已联系，等待响应
-  ENGAGED: 'Engaged',       // 已回应，正在互动
-  QUALIFIED: 'Qualified',   // 已确认有效，符合目标客户
-  NURTURING: 'Nurturing',   // 培育中，持续跟进
-  NEGOTIATING: 'Negotiating', // 谈判中，深入商谈
-  CLOSED_WON: 'Closed Won', // 已成交
-  CLOSED_LOST: 'Closed Lost' // 已流失
-} as const
-
-type WorkflowStage = typeof WORKFLOW_STAGES[keyof typeof WORKFLOW_STAGES]
-
-// 更新示例数据
-const leads = ref<Lead[]>([
-  {
-    id: 1,
-    name: 'Sarah Chen',
-    email: 'sarah.chen@techcorp.com',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face',
-    stage: WORKFLOW_STAGES.QUALIFIED,
-    company: 'TechCorp Inc.',
-    position: 'Chief Technology Officer',
-    active: true,
-    lastContact: new Date('2024-01-15T09:30:00')
-  },
-  {
-    id: 2,
-    name: 'Michael Johnson',
-    email: 'm.johnson@innovatelabs.io',
-    avatar: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=100&h=100&fit=crop&crop=face',
-    stage: WORKFLOW_STAGES.NEW,
-    company: 'Innovation Labs',
-    position: 'VP of Engineering',
-    active: false,
-    lastContact: new Date('2024-01-15T14:15:00')
-  },
-  {
-    id: 3,
-    name: 'Emily Wang',
-    email: 'emily.w@dataflow.ai',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face',
-    stage: WORKFLOW_STAGES.NEGOTIATING,
-    company: 'DataFlow Systems',
-    position: 'Head of AI Research',
-    active: true,
-    lastContact: new Date('2024-01-15T11:45:00')
-  },
-  {
-    id: 4,
-    name: 'David Miller',
-    email: 'david.miller@cloudtech.dev',
-    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=face',
-    stage: WORKFLOW_STAGES.CONTACTED,
-    company: 'Cloud Solutions Pro',
-    position: 'Solutions Architect',
-    active: true,
-    lastContact: new Date('2024-01-15T16:20:00')
-  },
-  {
-    id: 5,
-    name: 'Lisa Zhang',
-    email: 'l.zhang@aiinnovate.com',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face',
-    stage: WORKFLOW_STAGES.NURTURING,
-    company: 'AI Innovations',
-    position: 'Machine Learning Lead',
-    active: true,
-    lastContact: new Date('2024-01-15T13:05:00')
-  },
-  {
-    id: 6,
-    name: 'James Wilson',
-    email: 'j.wilson@quantumtech.net',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
-    stage: WORKFLOW_STAGES.ENGAGED,
-    company: 'Quantum Technologies',
-    position: 'Quantum Computing Researcher',
-    active: true,
-    lastContact: new Date('2024-01-15T10:30:00')
-  },
-  {
-    id: 7,
-    name: 'Sofia Rodriguez',
-    email: 'sofia@cybersec.io',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
-    stage: WORKFLOW_STAGES.CLOSED_LOST,
-    company: 'CyberSec Solutions',
-    position: 'Security Director',
-    active: false,
-    lastContact: new Date('2024-01-15T15:45:00')
-  },
-  {
-    id: 8,
-    name: 'Alex Kim',
-    email: 'alex.kim@robotics.co',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face',
-    stage: WORKFLOW_STAGES.QUALIFIED,
-    company: 'Advanced Robotics',
-    position: 'Robotics Engineer',
-    active: true,
-    lastContact: new Date('2024-01-15T12:15:00')
-  }
-])
+import { 
+  type Lead, 
+  type WorkflowStage,
+  WORKFLOW_STAGES,
+  leads as leadsData,
+  getStageClass,
+  enrichLeadData
+} from '@/data/leadsData'
 
 // 搜索和分页
 const searchQuery = ref('')
 const currentPage = ref(1)
-const pageSize = 5
+const pageSize = 10
 const selectedLeads = ref<number[]>([])
+const leads = ref<Lead[]>(leadsData)
 
 // 搜索结果
 const filteredLeads = computed(() => {
@@ -309,302 +198,92 @@ const totalPages = computed(() => Math.ceil(filteredLeads.value.length / pageSiz
 const startIndex = computed(() => (currentPage.value - 1) * pageSize)
 const endIndex = computed(() => Math.min(startIndex.value + pageSize, filteredLeads.value.length))
 
+// 生成分页按钮数组
+const paginationButtons = computed(() => {
+  const buttons: (number | string)[] = []
+  const maxVisiblePages = 5
+  const halfVisible = Math.floor(maxVisiblePages / 2)
+  
+  let startPage = Math.max(1, currentPage.value - halfVisible)
+  let endPage = Math.min(totalPages.value, startPage + maxVisiblePages - 1)
+  
+  if (endPage - startPage + 1 < maxVisiblePages) {
+    startPage = Math.max(1, endPage - maxVisiblePages + 1)
+  }
+  
+  // 添加第一页
+  if (startPage > 1) {
+    buttons.push(1)
+    if (startPage > 2) buttons.push('...')
+  }
+  
+  // 添加中间页码
+  for (let i = startPage; i <= endPage; i++) {
+    buttons.push(i)
+  }
+  
+  // 添加最后页
+  if (endPage < totalPages.value) {
+    if (endPage < totalPages.value - 1) buttons.push('...')
+    buttons.push(totalPages.value)
+  }
+  
+  return buttons
+})
+
 // 当前页数据
 const paginatedLeads = computed(() => {
   return filteredLeads.value.slice(startIndex.value, endIndex.value)
 })
 
-// 生成页码数组
-const pageNumbers = computed(() => {
-  const total = totalPages.value
-  const current = currentPage.value
-  const pages: number[] = []
-  
-  // 显示当前页附近的页码和首尾页
-  for (let i = 1; i <= total; i++) {
-    if (
-      i === 1 || // 第一页
-      i === total || // 最后一页
-      (i >= current - 1 && i <= current + 1) // 当前页及其前后页
-    ) {
-      pages.push(i)
-    } else if (pages[pages.length - 1] !== -1) {
-      // 添加省略号标记
-      pages.push(-1)
-    }
-  }
-  
-  return pages
-})
-
-// 监听搜索，重置页码
-watch(searchQuery, () => {
-  currentPage.value = 1
-})
-
-// 批量选择
+// 全选状态
 const isAllSelected = computed(() => {
   return paginatedLeads.value.length > 0 && 
     paginatedLeads.value.every(lead => selectedLeads.value.includes(lead.id))
 })
 
+// 切换全选
 const toggleSelectAll = () => {
   if (isAllSelected.value) {
     selectedLeads.value = selectedLeads.value.filter(
-      id => !paginatedLeads.value.find(lead => lead.id === id)
+      id => !paginatedLeads.value.some(lead => lead.id === id)
     )
   } else {
-    const currentPageIds = paginatedLeads.value.map(lead => lead.id)
-    selectedLeads.value = [...new Set([...selectedLeads.value, ...currentPageIds])]
+    const newSelectedLeads = new Set(selectedLeads.value)
+    paginatedLeads.value.forEach(lead => newSelectedLeads.add(lead.id))
+    selectedLeads.value = Array.from(newSelectedLeads)
   }
 }
 
-// 工作流阶段样式
-const getStageClass = (stage: WorkflowStage): string => {
-  const classes = {
-    [WORKFLOW_STAGES.NEW]: 'bg-blue-100 text-blue-800',
-    [WORKFLOW_STAGES.CONTACTED]: 'bg-yellow-100 text-yellow-800',
-    [WORKFLOW_STAGES.ENGAGED]: 'bg-indigo-100 text-indigo-800',
-    [WORKFLOW_STAGES.QUALIFIED]: 'bg-green-100 text-green-800',
-    [WORKFLOW_STAGES.NURTURING]: 'bg-primary-light text-primary',
-    [WORKFLOW_STAGES.NEGOTIATING]: 'bg-orange-100 text-orange-800',
-    [WORKFLOW_STAGES.CLOSED_WON]: 'bg-emerald-100 text-emerald-800',
-    [WORKFLOW_STAGES.CLOSED_LOST]: 'bg-gray-100 text-gray-800'
-  }
-  return classes[stage] || 'bg-gray-100 text-gray-800'
-}
-
-// 判断是否处于活跃状态
-const isActive = (stage: WorkflowStage): boolean => {
-  const activeStages = [
-    WORKFLOW_STAGES.CONTACTED,
-    WORKFLOW_STAGES.ENGAGED,
-    WORKFLOW_STAGES.QUALIFIED,
-    WORKFLOW_STAGES.NURTURING,
-    WORKFLOW_STAGES.NEGOTIATING
-  ] as const
-  return activeStages.includes(stage as typeof activeStages[number])
-}
-
-// 更新日期格式化函数
-const formatDate = (date: Date): string => {
-  const now = new Date()
-  const diff = now.getTime() - date.getTime()
-  const minutes = Math.floor(diff / 60000)
-  const hours = Math.floor(minutes / 60)
-  const days = Math.floor(hours / 24)
-
-  // 如果是今天的日期，只显示时间
-  if (days === 0) {
-    return new Intl.DateTimeFormat('en-US', {
-      hour: 'numeric',
-      minute: '2-digit'
-    }).format(date)
-  }
-
-  // 如果是最近7天的日期，显示周几和时间
-  if (days < 7) {
-    return new Intl.DateTimeFormat('en-US', {
-      weekday: 'short',
-      hour: 'numeric',
-      minute: '2-digit'
-    }).format(date)
-  }
-
-  // 其他情况显示月日和时间
+// 日期格式化
+const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
-    minute: '2-digit'
+    minute: 'numeric'
   }).format(date)
 }
 
-// 详情面板相关
 const router = useRouter()
+const showDetailsPanel = ref(false)
+const selectedLead = ref<Lead | null>(null)
 
-// 添加打开和关闭详情面板的方法
+// 打开 lead 详情
 const openLeadDetails = (lead: Lead) => {
   router.push(`/leads/${lead.id}`)
 }
 
+// 关闭 lead 详情
 const closeLeadDetails = () => {
   showDetailsPanel.value = false
   selectedLead.value = null
 }
 
-// 添加数据丰富方法
-const enrichLeadData = (lead: Lead) => {
-  // 根据行业和职位推断使用的技术栈
-  const techStackMap = {
-    'AI Innovations': ['Python', 'TensorFlow', 'React'],
-    'Cloud Solutions Pro': ['AWS', 'Docker', 'Node'],
-    'DevOps Cloud': ['Docker', 'Jenkins', 'Node'],
-    'Blockchain Solutions': ['React', 'Node', 'Vue'],
-    'EdTech Innovations': ['React', 'Node', 'Vue'],
-    'FinTech Solutions': ['React', 'Node', 'Vue'],
-    'GameDev Studio': ['React', 'Node', 'Vue'],
-    'HealthTech Systems': ['React', 'Node', 'Vue'],
-    'IoT Technologies': ['React', 'Node', 'Vue'],
-    'MLOps Solutions': ['Python', 'TensorFlow', 'React'],
-    'Quantum Technologies': ['Python', 'React', 'Node'],
-    'Robotics Innovation': ['Python', 'React', 'Node'],
-    'VR Systems': ['React', 'Node', 'Vue']
-  }
-
-  // 根据公司规模推断融资阶段和收入
-  const companyScaleMap = {
-    small: {
-      headcount: '10-50',
-      fundingStage: 'Seed',
-      revenue: '$1-5M'
-    },
-    medium: {
-      headcount: '51-200',
-      fundingStage: 'Series A',
-      revenue: '$5-20M'
-    },
-    large: {
-      headcount: '201-500',
-      fundingStage: 'Series B',
-      revenue: '$20-50M'
-    }
-  }
-
-  // 根据邮箱域名生成公司网站
-  const website = `https://${lead.email.split('@')[1]}`
-
-  // 生成社交媒体链接
-  const generateSocialLinks = (name: string) => {
-    const formattedName = name.toLowerCase().replace(' ', '')
-    return {
-      linkedin: `https://linkedin.com/in/${formattedName}`,
-      twitter: `https://twitter.com/${formattedName}`
-    }
-  }
-
-  // 根据职位生成兴趣和洞察
-  const generateInterestsAndInsights = (position: string) => {
-    const positionMap = {
-      'CTO': {
-        interests: 'Tech Architecture, Cloud Computing, Team Leadership',
-        insights: 'Looking for scalable cloud solutions'
-      },
-      'CEO': {
-        interests: 'Business Strategy, Leadership, Innovation',
-        insights: 'Exploring new market opportunities'
-      },
-      'Engineering Manager': {
-        interests: 'Software Development, Team Management, Agile',
-        insights: 'Building high-performance engineering teams'
-      },
-      'Product Manager': {
-        interests: 'Product Strategy, UX Design, Market Research',
-        insights: 'Seeking user feedback and analytics tools'
-      },
-      'Director': {
-        interests: 'Strategic Planning, Operations, Growth',
-        insights: 'Optimizing operational efficiency'
-      }
-    }
-
-    const defaultInterests = 'Technology, Innovation, Professional Growth'
-    const defaultInsights = 'Exploring industry solutions'
-    const roleType = Object.keys(positionMap).find(role => position.includes(role)) as keyof typeof positionMap | undefined
-    return roleType ? positionMap[roleType] : { interests: defaultInterests, insights: defaultInsights }
-  }
-
-  // 生成完整的详细信息
-  const companySize = lead.id % 3 === 0 ? 'large' : lead.id % 2 === 0 ? 'medium' : 'small'
-  const companyInfo = companyScaleMap[companySize]
-  const socialLinks = generateSocialLinks(lead.name)
-  const { interests, insights } = generateInterestsAndInsights(lead.position)
-  const techStack = techStackMap[lead.company as keyof typeof techStackMap] || ['React', 'Node', 'Vue']
-
-  const techStackColors = {
-    'React': 'bg-blue-100',
-    'Node': 'bg-green-100',
-    'Vue': 'bg-emerald-100',
-    'Python': 'bg-yellow-100',
-    'TensorFlow': 'bg-orange-100',
-    'Docker': 'bg-blue-100',
-    'Jenkins': 'bg-red-100',
-    'AWS': 'bg-orange-100'
-  }
-
-  return {
-    ...lead,
-    location: 'San Francisco, CA',
-    linkedin: socialLinks.linkedin,
-    twitter: socialLinks.twitter,
-    interests,
-    insights,
-    companyInfo: {
-      ...companyInfo,
-      website
-    },
-    techStack: techStack.map(tech => ({
-      name: tech,
-      icon: `/src/assets/tech/${tech.toLowerCase()}.svg`,
-      bgColor: techStackColors[tech as keyof typeof techStackColors] || 'bg-gray-100'
-    })),
-    active: isActive(lead.stage)
-  }
-}
-
-const showDetailsPanel = ref(false)
-const selectedLead = ref<Lead | null>(null)
-
-// 添加类型定义
-interface PositionMap {
-  [key: string]: {
-    interests: string
-    insights: string
-  }
-}
-
-interface TechStackMap {
-  [key: string]: string[]
-}
-
-interface TechStackColors {
-  [key: string]: string
-}
-
-const positionMap: PositionMap = {
-  CTO: {
-    interests: 'Technical architecture, scalability, innovation',
-    insights: 'Focus on technical benefits and ROI'
-  },
-  // ... rest of the position map
-}
-
-const techStackMap: TechStackMap = {
-  'AI Innovations': ['Python', 'TensorFlow', 'React'],
-  'Cloud Solutions Pro': ['AWS', 'Docker', 'Node'],
-  'DevOps Cloud': ['Docker', 'Jenkins', 'Node'],
-  'Blockchain Solutions': ['React', 'Node', 'Vue'],
-  'EdTech Innovations': ['React', 'Node', 'Vue'],
-  'FinTech Solutions': ['React', 'Node', 'Vue'],
-  'GameDev Studio': ['React', 'Node', 'Vue'],
-  'HealthTech Systems': ['React', 'Node', 'Vue'],
-  'IoT Technologies': ['React', 'Node', 'Vue'],
-  'MLOps Solutions': ['Python', 'TensorFlow', 'React'],
-  'Quantum Technologies': ['Python', 'React', 'Node'],
-  'Robotics Innovation': ['Python', 'React', 'Node'],
-  'VR Systems': ['React', 'Node', 'Vue']
-}
-
-const techStackColors: TechStackColors = {
-  'React': 'bg-blue-100',
-  'Node': 'bg-green-100',
-  'Vue': 'bg-emerald-100',
-  'Python': 'bg-yellow-100',
-  'TensorFlow': 'bg-orange-100',
-  'Docker': 'bg-blue-100',
-  'Jenkins': 'bg-red-100',
-  'AWS': 'bg-orange-100'
-}
+// 监听搜索，重置分页
+watch(searchQuery, () => {
+  currentPage.value = 1
+})
 </script>
 
 <style scoped>

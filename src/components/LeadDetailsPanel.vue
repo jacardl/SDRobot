@@ -132,36 +132,12 @@
 </template>
 
 <script setup lang="ts">
-interface TechStack {
-  name: string
-  icon: string
-  bgColor: string
-}
-
-interface CompanyInfo {
-  headcount: string
-  fundingStage: string
-  revenue: string
-  website: string
-}
-
-interface Lead {
-  id: number
-  name: string
-  email: string
-  avatar: string
-  position: string
-  company: string
-  location: string
-  linkedin?: string
-  twitter?: string
-  interests: string
-  insights: string
-  companyInfo: CompanyInfo
-  techStack: TechStack[]
-  stage: string
-  active: boolean
-}
+import { 
+  type Lead,
+  type CompanyInfo,
+  type TechStack,
+  getStageClass
+} from '@/data/leadsData'
 
 const props = defineProps<{
   lead: Lead
@@ -171,21 +147,6 @@ const props = defineProps<{
 defineEmits<{
   (e: 'close'): void
 }>()
-
-// 工作流阶段样式
-const getStageClass = (stage: string): string => {
-  const classes: Record<string, string> = {
-    'New Lead': 'bg-blue-100 text-blue-800',
-    'Contacted': 'bg-yellow-100 text-yellow-800',
-    'Engaged': 'bg-indigo-100 text-indigo-800',
-    'Qualified': 'bg-green-100 text-green-800',
-    'Nurturing': 'bg-purple-100 text-purple-800',
-    'Negotiating': 'bg-orange-100 text-orange-800',
-    'Closed Won': 'bg-emerald-100 text-emerald-800',
-    'Closed Lost': 'bg-gray-100 text-gray-800'
-  }
-  return classes[stage] || 'bg-gray-100 text-gray-800'
-}
 </script>
 
 <style scoped>

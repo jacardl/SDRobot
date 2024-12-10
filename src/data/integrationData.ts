@@ -1,3 +1,9 @@
+import slackIcon from '@/assets/integrations/slack.svg'
+import hubspotIcon from '@/assets/integrations/hubspot.svg'
+import salesforceIcon from '@/assets/integrations/salesforce.svg'
+import linkedinIcon from '@/assets/integrations/linkedin.svg'
+import zapierIcon from '@/assets/integrations/zapier.svg'
+
 export type IntegrationStatus = 'connected' | 'not_connected' | 'coming_soon'
 
 export interface Integration {
@@ -13,15 +19,15 @@ export const integrations: Integration[] = [
   {
     id: 'slack',
     name: 'Slack',
-    description: 'Used to chat with Artisans and receive notifications.',
-    icon: '@/assets/integrations/slack.svg',
+    description: 'Used to chat with SDRobot and receive notifications.',
+    icon: slackIcon,
     status: 'connected'
   },
   {
     id: 'hubspot',
     name: 'HubSpot',
     description: 'Used to export engaged leads to your CRM.',
-    icon: '@/assets/integrations/hubspot.svg',
+    icon: hubspotIcon,
     status: 'connected',
     hasConfig: true
   },
@@ -29,21 +35,21 @@ export const integrations: Integration[] = [
     id: 'salesforce',
     name: 'Salesforce',
     description: 'Used to export engaged leads to your CRM.',
-    icon: '@/assets/integrations/salesforce.svg',
+    icon: salesforceIcon,
     status: 'not_connected'
   },
   {
     id: 'linkedin',
     name: 'LinkedIn',
     description: 'Used to send LinkedIn connection requests and messages.',
-    icon: '@/assets/integrations/linkedin.svg',
+    icon: linkedinIcon,
     status: 'coming_soon'
   },
   {
     id: 'zapier',
     name: 'Zapier',
-    description: 'Connect your Artisan to 1000s of apps.',
-    icon: '@/assets/integrations/zapier.svg',
+    description: 'Connect your SDRobot to 1000s of apps.',
+    icon: zapierIcon,
     status: 'coming_soon'
   }
 ]

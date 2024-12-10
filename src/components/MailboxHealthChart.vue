@@ -7,14 +7,14 @@
         {{ displayedHealth }}%
       </div>
       <div class="text-sm text-gray-500">
-        {{ hoveredIndex !== null ? mailboxes[hoveredIndex].name : t('dashboard.healthScore') }}
+        {{ hoveredIndex !== null ? sortedMailboxes[hoveredIndex].email : t('dashboard.healthScore') }}
       </div>
     </div>
     
     <!-- SVG 环形图 -->
     <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
       <g>
-        <template v-for="(mailbox, index) in mailboxes" :key="mailbox.id">
+        <template v-for="(mailbox, index) in sortedMailboxes" :key="mailbox.email">
           <!-- 计算每个环的位置和大小 -->
           <circle
             :cx="50"
@@ -39,40 +39,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useMailboxStore } from '@/stores/mailbox'
 
 const { t } = useI18n()
-
-interface Mailbox {
-  id: number
-  name: string
-  health: number
-}
-
-// 示例数据
-const mailboxes = ref<Mailbox[]>([
-  { id: 1, name: 'marketing@sdrobot.ai', health: 95 },
-  { id: 2, name: 'sales@sdrobot.ai', health: 88 },
-  { id: 3, name: 'support@sdrobot.ai', health: 92 },
-  { id: 4, name: 'contact@sdrobot.ai', health: 85 }
-])
+const mailboxStore = useMailboxStore()
 
 // 当前悬浮的邮箱索引
 const hoveredIndex = ref<number | null>(null)
 
-// 计算平均健康度
-const averageHealth = computed(() => {
-  const total = mailboxes.value.reduce((sum, box) => sum + box.health, 0)
-  return total / mailboxes.value.length
-})
+// 获取排序后的邮箱列表
+const sortedMailboxes = computed(() => mailboxStore.sortedMailboxes)
 
 // 显示的健康度（根据悬浮状态显示不同的值）
 const displayedHealth = computed(() => {
-  if (hoveredIndex.value !== null) {
-    return mailboxes.value[hoveredIndex.value].health.toFixed(2)
+  if (hoveredIndex.value !== null && sortedMailboxes.value[hoveredIndex.value]) {
+    return sortedMailboxes.value[hoveredIndex.value].health.toFixed(2)
   }
-  return averageHealth.value.toFixed(2)
+  return mailboxStore.averageHealth.toFixed(2)
+})
+
+// 初始化时加载邮箱数据
+onMounted(() => {
+  mailboxStore.loadMailboxes()
 })
 </script>
 

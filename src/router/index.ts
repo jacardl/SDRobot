@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import MainLayout from '@layouts/MainLayout.vue'
-import SimpleLayout from '@layouts/SimpleLayout.vue'
-import Leads from '@views/Leads.vue'
+import MainLayout from '@/layouts/MainLayout.vue'
+import SimpleLayout from '@/layouts/SimpleLayout.vue'
+import Leads from '@/views/Leads.vue'
 import LeadDetail from '@/views/LeadDetail.vue'
 
 const router = createRouter({
@@ -14,60 +14,58 @@ const router = createRouter({
         {
           path: '',
           name: 'dashboard',
-          component: () => import('@views/Dashboard.vue')
+          component: () => import('@/views/Dashboard.vue')
         },
         {
-          path: '/leads',
+          path: 'leads',
           name: 'leads',
-          component: Leads
+          component: () => import('@/views/Leads.vue')
+        },
+        {
+          path: 'leads/:id',
+          name: 'lead-detail',
+          component: () => import('@/views/LeadDetail.vue')
         },
         {
           path: 'chat',
           name: 'chat',
-          component: () => import('@views/Chat.vue')
+          component: () => import('@/views/Chat.vue')
         },
         {
           path: 'integrations',
           name: 'integrations',
-          component: () => import('@views/Integrations.vue')
+          component: () => import('@/views/Integrations.vue')
         },
         {
           path: 'inbox',
           name: 'inbox',
-          component: () => import('@views/Inbox.vue')
+          component: () => import('@/views/Inbox.vue')
         },
         {
           path: 'campaigns',
           name: 'campaigns',
-          component: () => import('@views/Campaigns.vue')
+          component: () => import('@/views/Campaigns.vue')
         },
         {
           path: 'pending-approval',
           name: 'pending-approval',
-          component: () => import('@views/PendingApproval.vue')
+          component: () => import('@/views/PendingApproval.vue')
         },
         {
           path: 'mailboxes',
           name: 'mailboxes',
-          component: () => import('@views/Mailboxes.vue')
+          component: () => import('@/views/Mailboxes.vue')
         },
         {
           path: 'analytics',
           name: 'analytics',
-          component: () => import('@views/Analytics.vue')
+          component: () => import('@/views/Analytics.vue')
         }
       ]
     },
     {
-      path: '/leads/:id',
-      component: SimpleLayout,
-      children: [
-        {
-          path: '',
-          name: 'lead-detail',
-          component: LeadDetail
-        }
-      ]
+      path: '/oauth/callback',
+      component: () => import('@/views/OAuthCallback.vue')
     }
   ]
 })

@@ -29,7 +29,7 @@
 
     <!-- 右侧内容区域 -->
     <div class="flex-1 flex flex-col overflow-hidden">
-      <TopStatusBar />
+      <TopStatusBar v-if="!isChat" />
       <main class="flex-1 overflow-x-hidden overflow-y-auto">
         <router-view />
       </main>
@@ -38,9 +38,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import TopStatusBar from '@/components/TopStatusBar.vue'
 import SideNav from '@/components/SideNav.vue'
+
+const route = useRoute()
+const isChat = computed(() => route.name === 'chat')
 
 // 从本地存储获取初始状态，如果没有则默认为展开状态
 const isCollapsed = ref(localStorage.getItem('sideNavCollapsed') === 'true')

@@ -1,8 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '@layouts/MainLayout.vue'
+import SimpleLayout from '@layouts/SimpleLayout.vue'
+import Leads from '@views/Leads.vue'
+import LeadDetail from '@/views/LeadDetail.vue'
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
@@ -14,9 +17,9 @@ const router = createRouter({
           component: () => import('@views/Dashboard.vue')
         },
         {
-          path: 'leads',
+          path: '/leads',
           name: 'leads',
-          component: () => import('@views/Leads.vue')
+          component: Leads
         },
         {
           path: 'chat',
@@ -52,6 +55,17 @@ const router = createRouter({
           path: 'analytics',
           name: 'analytics',
           component: () => import('@views/Analytics.vue')
+        }
+      ]
+    },
+    {
+      path: '/leads/:id',
+      component: SimpleLayout,
+      children: [
+        {
+          path: '',
+          name: 'lead-detail',
+          component: LeadDetail
         }
       ]
     }

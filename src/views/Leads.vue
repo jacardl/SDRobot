@@ -156,6 +156,7 @@
 import { ref, computed, watch } from 'vue'
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import LeadDetailsPanel from '../components/LeadDetailsPanel.vue'
+import { useRouter } from 'vue-router'
 
 interface Lead {
   id: number
@@ -255,7 +256,7 @@ const leads = ref<Lead[]>([
     id: 7,
     name: 'Sofia Rodriguez',
     email: 'sofia@cybersec.io',
-    avatar: '/src/assets/user-avatar.svg',
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
     stage: WORKFLOW_STAGES.CLOSED_LOST,
     company: 'CyberSec Solutions',
     position: 'Security Director',
@@ -266,254 +267,12 @@ const leads = ref<Lead[]>([
     id: 8,
     name: 'Alex Kim',
     email: 'alex.kim@robotics.co',
-    avatar: '/src/assets/user-avatar.svg',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face',
     stage: WORKFLOW_STAGES.QUALIFIED,
     company: 'Advanced Robotics',
     position: 'Robotics Engineer',
     active: true,
     lastContact: new Date('2024-01-15T12:15:00')
-  },
-  {
-    id: 9,
-    name: 'Rachel Green',
-    email: 'r.green@biotech.org',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.NEW,
-    company: 'BioTech Research',
-    position: 'Bioinformatics Lead',
-    active: false,
-    lastContact: new Date('2024-01-15T17:30:00')
-  },
-  {
-    id: 10,
-    name: 'Daniel Lee',
-    email: 'd.lee@vrsystems.tech',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.CLOSED_WON,
-    company: 'VR Systems',
-    position: 'VR Development Head',
-    active: false,
-    lastContact: new Date('2024-01-15T14:45:00')
-  },
-  {
-    id: 11,
-    name: 'Emma Thompson',
-    email: 'emma.t@blockchain.io',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.QUALIFIED,
-    company: 'Blockchain Solutions',
-    position: 'Blockchain Architect',
-    active: true,
-    lastContact: new Date('2024-01-15T11:15:00')
-  },
-  {
-    id: 12,
-    name: 'Marcus Brown',
-    email: 'm.brown@iottech.com',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.NEW,
-    company: 'IoT Technologies',
-    position: 'IoT Solutions Lead',
-    active: false,
-    lastContact: new Date('2024-01-15T16:45:00')
-  },
-  {
-    id: 13,
-    name: 'Anna Martinez',
-    email: 'anna.m@edtech.edu',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.NEGOTIATING,
-    company: 'EdTech Innovations',
-    position: 'Educational Technology Director',
-    active: true,
-    lastContact: new Date('2024-01-15T13:30:00')
-  },
-  {
-    id: 14,
-    name: 'Ryan Taylor',
-    email: 'ryan.t@fintech.finance',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.CONTACTED,
-    company: 'FinTech Solutions',
-    position: 'Financial Systems Architect',
-    active: false,
-    lastContact: new Date('2024-01-15T10:05:00')
-  },
-  {
-    id: 15,
-    name: 'Julia Park',
-    email: 'j.park@healthtech.care',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.NURTURING,
-    company: 'HealthTech Systems',
-    position: 'Healthcare Solutions Lead',
-    active: true,
-    lastContact: new Date('2024-01-15T15:55:00')
-  },
-  {
-    id: 16,
-    name: 'Chris Anderson',
-    email: 'c.anderson@devops.cloud',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.ENGAGED,
-    company: 'DevOps Cloud',
-    position: 'DevOps Manager',
-    active: true,
-    lastContact: new Date('2024-01-15T12:40:00')
-  },
-  {
-    id: 17,
-    name: 'Nina Patel',
-    email: 'nina.p@datasci.ai',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.CLOSED_LOST,
-    company: 'Data Science AI',
-    position: 'Data Science Director',
-    active: false,
-    lastContact: new Date('2024-01-15T17:20:00')
-  },
-  {
-    id: 18,
-    name: 'Thomas Wright',
-    email: 't.wright@gamedev.studio',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.NEGOTIATING,
-    company: 'Game Development Studio',
-    position: 'Game Engine Architect',
-    active: true,
-    lastContact: new Date('2024-01-15T14:25:00')
-  },
-  {
-    id: 19,
-    name: 'Maria Garcia',
-    email: 'm.garcia@mlops.ai',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.CONTACTED,
-    company: 'MLOps Solutions',
-    position: 'ML Operations Lead',
-    active: false,
-    lastContact: new Date('2024-01-15T11:50:00')
-  },
-  {
-    id: 20,
-    name: 'Kevin Chang',
-    email: 'k.chang@quantum.computing',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.NURTURING,
-    company: 'Quantum Computing Labs',
-    position: 'Quantum Algorithm Researcher',
-    active: true,
-    lastContact: new Date('2024-01-15T16:15:00')
-  },
-  {
-    id: 21,
-    name: 'Laura Wilson',
-    email: 'l.wilson@cybersecurity.net',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.QUALIFIED,
-    company: 'Cybersecurity Experts',
-    position: 'Security Operations Manager',
-    active: true,
-    lastContact: new Date('2024-01-15T13:45:00')
-  },
-  {
-    id: 22,
-    name: 'Samuel Kim',
-    email: 's.kim@robotics.tech',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.CLOSED_WON,
-    company: 'Robotics Innovation',
-    position: 'Automation Director',
-    active: false,
-    lastContact: new Date('2024-01-15T10:30:00')
-  },
-  {
-    id: 23,
-    name: 'Isabella Chen',
-    email: 'i.chen@bioinfo.science',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.ENGAGED,
-    company: 'Bioinformatics Research',
-    position: 'Computational Biology Lead',
-    active: true,
-    lastContact: new Date('2024-01-15T15:40:00')
-  },
-  {
-    id: 24,
-    name: 'Oliver Brown',
-    email: 'o.brown@vr.technology',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.NEW,
-    company: 'VR Technology Solutions',
-    position: 'VR Experience Director',
-    active: false,
-    lastContact: new Date('2024-01-15T12:25:00')
-  },
-  {
-    id: 25,
-    name: 'Sophie Martin',
-    email: 's.martin@blockchain.tech',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.NEGOTIATING,
-    company: 'Blockchain Technology',
-    position: 'DeFi Solutions Architect',
-    active: true,
-    lastContact: new Date('2024-01-15T17:10:00')
-  },
-  {
-    id: 26,
-    name: 'William Lee',
-    email: 'w.lee@iot.solutions',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.QUALIFIED,
-    company: 'IoT Solutions Group',
-    position: 'Connected Devices Lead',
-    active: true,
-    lastContact: new Date('2024-01-15T14:35:00')
-  },
-  {
-    id: 27,
-    name: 'Elena Rodriguez',
-    email: 'e.rodriguez@edtech.solutions',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.CONTACTED,
-    company: 'EdTech Solutions',
-    position: 'Learning Systems Architect',
-    active: false,
-    lastContact: new Date('2024-01-15T11:20:00')
-  },
-  {
-    id: 28,
-    name: 'Andrew Zhang',
-    email: 'a.zhang@fintech.solutions',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.NURTURING,
-    company: 'FinTech Innovations',
-    position: 'Payment Systems Director',
-    active: true,
-    lastContact: new Date('2024-01-15T16:55:00')
-  },
-  {
-    id: 29,
-    name: 'Grace Wang',
-    email: 'g.wang@healthtech.solutions',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.CLOSED_LOST,
-    company: 'HealthTech Innovations',
-    position: 'Medical Systems Lead',
-    active: false,
-    lastContact: new Date('2024-01-15T13:15:00')
-  },
-  {
-    id: 30,
-    name: 'Robert Taylor',
-    email: 'r.taylor@devops.solutions',
-    avatar: '/src/assets/user-avatar.svg',
-    stage: WORKFLOW_STAGES.ENGAGED,
-    company: 'DevOps Solutions',
-    position: 'Infrastructure Architect',
-    active: true,
-    lastContact: new Date('2024-01-15T10:50:00')
   }
 ])
 
@@ -631,7 +390,7 @@ const formatDate = (date: Date): string => {
     }).format(date)
   }
 
-  // 如果是最近7天内的日期，显示周几和时间
+  // 如果是最近7天的日期，显示周几和时间
   if (days < 7) {
     return new Intl.DateTimeFormat('en-US', {
       weekday: 'short',
@@ -650,13 +409,11 @@ const formatDate = (date: Date): string => {
 }
 
 // 详情面板相关
-const showDetailsPanel = ref(false)
-const selectedLead = ref<Lead | null>(null)
+const router = useRouter()
 
 // 添加打开和关闭详情面板的方法
 const openLeadDetails = (lead: Lead) => {
-  selectedLead.value = enrichLeadData(lead)
-  showDetailsPanel.value = true
+  router.push(`/leads/${lead.id}`)
 }
 
 const closeLeadDetails = () => {

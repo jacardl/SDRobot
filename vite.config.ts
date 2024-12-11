@@ -1,21 +1,26 @@
+import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import path from 'path'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 
 export default defineConfig({
   plugins: [
     vue(),
     VueI18nPlugin({
-      include: [path.resolve(__dirname, './src/locales/**')]
+      include: fileURLToPath(new URL('./src/locales/**', import.meta.url))
     })
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@components': path.resolve(__dirname, './src/components'),
-      '@layouts': path.resolve(__dirname, './src/layouts'),
-      '@views': path.resolve(__dirname, './src/views')
+      '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 4173
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: 4173
   }
 })

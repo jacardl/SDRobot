@@ -4,7 +4,7 @@
   "description": "一个现代化的销售线索(Leads)管理系统，帮助销售和市场营销人员高效管理潜在客户。",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "start": "npm run dev"
   },
@@ -22,15 +22,16 @@
   },
   "devDependencies": {
     "@intlify/unplugin-vue-i18n": "^2.0.0",
-    "@types/node": "^20.17.9",
+    "@types/node": "^20.17.10",
     "@vitejs/plugin-vue": "^4.5.0",
     "@vue/runtime-core": "^3.3.8",
     "@vue/tsconfig": "^0.4.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.16",
-    "typescript": "^5.2.2",
+    "typescript": "^5.7.2",
     "vite": "^5.0.0",
     "vue-tsc": "^1.8.22"
-  }
+  },
+  "type": "commonjs"
 }

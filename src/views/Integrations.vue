@@ -1,12 +1,12 @@
 <template>
-  <div class="p-6">
+  <div class="p-4 sm:p-6">
     <div class="max-w-7xl mx-auto">
-      <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900">Integrations</h1>
+      <div class="mb-6 sm:mb-8">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Integrations</h1>
         <p class="mt-1 text-sm text-gray-500">Import data to and export data from Artisan.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
         <IntegrationCard
           v-for="integration in integrations"
           :key="integration.id"
@@ -35,7 +35,7 @@
 
         <div class="fixed inset-0 overflow-hidden">
           <div class="absolute inset-0 overflow-hidden">
-            <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+            <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10 sm:pl-16">
               <TransitionChild
                 as="template"
                 enter="transform transition ease-in-out duration-500"
@@ -45,11 +45,11 @@
                 leave-from="translate-x-0"
                 leave-to="translate-x-full"
               >
-                <DialogPanel class="pointer-events-auto relative w-96">
+                <DialogPanel class="pointer-events-auto w-screen max-w-md">
                   <div class="flex h-full flex-col overflow-y-auto bg-white py-6 shadow-xl">
                     <div class="px-4 sm:px-6">
                       <div class="flex items-start justify-between">
-                        <DialogTitle class="text-lg font-medium text-gray-900">
+                        <DialogTitle class="text-base sm:text-lg font-medium text-gray-900">
                           {{ selectedIntegration?.name }} Configuration
                         </DialogTitle>
                         <div class="ml-3 flex h-7 items-center">
@@ -79,8 +79,8 @@
                         <div>
                           <label class="block text-sm font-medium text-gray-700">Lead Status Mapping</label>
                           <div class="mt-2 space-y-4">
-                            <div v-for="status in ['New Lead', 'Contacted', 'Qualified']" :key="status" class="flex items-center">
-                              <span class="w-24 text-sm text-gray-500">{{ status }}</span>
+                            <div v-for="status in ['New Lead', 'Contacted', 'Qualified']" :key="status" class="flex items-center space-x-2">
+                              <span class="min-w-[80px] text-sm text-gray-500">{{ status }}</span>
                               <select class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
                                 <option>New</option>
                                 <option>Open</option>
@@ -93,14 +93,14 @@
                         <div class="flex justify-end space-x-3">
                           <button
                             type="button"
-                            class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                            class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                             @click="showConfigDrawer = false"
                           >
                             Cancel
                           </button>
                           <button
                             type="button"
-                            class="inline-flex justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                            class="inline-flex justify-center rounded-md border border-transparent bg-primary px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                             @click="saveConfig"
                           >
                             Save

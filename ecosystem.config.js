@@ -6,7 +6,7 @@ module.exports = {
     cwd: '/home/devbox/project',
     env: {
       NODE_ENV: 'production',
-      PORT: '4173'
+      PORT: '4174'
     }
   }]
 } 

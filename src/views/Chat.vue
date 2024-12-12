@@ -99,6 +99,7 @@
 
 <script setup lang="ts">
 import { ref, watch, nextTick, onMounted } from 'vue'
+import { aiService } from '@/services/aiService'
 
 interface Message {
   id: number
@@ -219,31 +220,44 @@ const sendMessage = async (content: string) => {
   // 显示输入提示
   isTyping.value = true
 
-  // 模拟 AI 响应
-  setTimeout(() => {
+  try {
+    // 创建新的 AI 消息
+    const aiMessageId = Date.now()
+    messages.value.push({
+      id: aiMessageId,
+      type: 'ai',
+      content: '',
+      timestamp: new Date()
+    })
+
+    // 监听增量更新
+    aiService.on('update', (newContent: string) => {
+      const aiMessage = messages.value.find(msg => msg.id === aiMessageId)
+      if (aiMessage) {
+        aiMessage.content += newContent
+      }
+    })
+
+    // 调用 AI 服务
+    await aiService.generateResponse([{
+      role: 'user',
+      content: content,
+      timestamp: Date.now()
+    }])
+
+    isTyping.value = false
+  } catch (error) {
+    console.error('Chat Error:', error)
     isTyping.value = false
     
-    // 添加 AI 响应
+    // 添加错误消息
     messages.value.push({
       id: Date.now(),
       type: 'ai',
-      content: getAIResponse(content),
-      timestamp: new Date(),
-      quickReplies: ['Tell me more', 'Show my leads', 'Create a campaign']
+      content: 'Sorry, I encountered an error. Please try again.',
+      timestamp: new Date()
     })
-  }, 1000)
-}
-
-// 模拟 AI 响应逻辑
-const getAIResponse = (userMessage: string): string => {
-  const responses = [
-    "I'd be happy to help you with that. Would you like to see some specific leads?",
-    "I can help you create a new campaign. Shall we get started?",
-    "I've analyzed your leads and found some interesting patterns. Would you like to hear more?",
-    "Based on your recent activity, I suggest focusing on these high-priority leads.",
-    "I can help you optimize your sales pipeline. What aspect would you like to improve?"
-  ]
-  return responses[Math.floor(Math.random() * responses.length)]
+  }
 }
 </script>
 

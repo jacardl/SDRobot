@@ -70,4 +70,11 @@ const router = createRouter({
   ]
 })
 
+console.log('Current routes:', router.getRoutes())
+
+router.beforeEach((to, from, next) => {
+  console.log('Navigating to:', to.path)
+  next()
+})
+
 export default router 

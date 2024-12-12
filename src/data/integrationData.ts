@@ -19,7 +19,7 @@ export const integrations: Integration[] = [
   {
     id: 'slack',
     name: 'Slack',
-    description: 'Used to chat with SDRobot and receive notifications.',
+    description: 'Used to chat with Skyline and receive notifications.',
     icon: slackIcon,
     status: 'connected'
   },
@@ -48,7 +48,7 @@ export const integrations: Integration[] = [
   {
     id: 'zapier',
     name: 'Zapier',
-    description: 'Connect your SDRobot to 1000s of apps.',
+    description: 'Connect your Skyline to 1000s of apps.',
     icon: zapierIcon,
     status: 'coming_soon'
   }

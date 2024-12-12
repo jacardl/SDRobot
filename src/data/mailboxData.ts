@@ -19,7 +19,7 @@ export interface Mailbox {
 // 默认邮箱数据
 export const defaultMailboxes: Mailbox[] = [
   {
-    email: 'jaspar@sdrobot.com',
+    email: 'jaspar@Skyline.com',
     capacity: 75,
     enabled: true,
     status: 'Urgent Issues',
@@ -34,7 +34,7 @@ export const defaultMailboxes: Mailbox[] = [
     }
   },
   {
-    email: 'jasparcarjack@sdrobot.com',
+    email: 'jasparcarjack@Skyline.com',
     capacity: 70,
     enabled: true,
     status: 'Warning',
@@ -49,7 +49,7 @@ export const defaultMailboxes: Mailbox[] = [
     }
   },
   {
-    email: 'jasparcj@sdrobot.com',
+    email: 'jasparcj@Skyline.com',
     capacity: 75,
     enabled: true,
     status: 'Healthy',

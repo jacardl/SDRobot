@@ -30,7 +30,7 @@ interface Mailbox {
 
 const mailboxes: Mailbox[] = [
   {
-    email: 'jaspar@sdrobot.com',
+    email: 'jaspar@Skyline.com',
     dailyEmailCapacity: 75,
     status: 'Urgent Issues',
     health: 60,
@@ -43,7 +43,7 @@ const mailboxes: Mailbox[] = [
     mxRecord: true
   },
   {
-    email: 'jasparcarjack@sdrobot.com',
+    email: 'jasparcarjack@Skyline.com',
     dailyEmailCapacity: 70,
     status: 'Warning',
     health: 75,
@@ -56,7 +56,7 @@ const mailboxes: Mailbox[] = [
     mxRecord: true
   },
   {
-    email: 'jasparcj@sdrobot.com',
+    email: 'jasparcj@Skyline.com',
     dailyEmailCapacity: 75,
     status: 'Healthy',
     health: 90,

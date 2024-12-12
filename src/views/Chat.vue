@@ -4,7 +4,7 @@
     <div class="flex-1 overflow-y-auto p-4 space-y-4 pb-24" ref="chatContainer">
       <!-- 欢迎消息 -->
       <div class="flex items-start space-x-3">
-        <img src="@/assets/jj-avatar.svg" alt="JJ" class="w-10 h-10 rounded-full" />
+        <img src="@/assets/jj-avatar.png" alt="JJ" class="w-10 h-10 rounded-full" />
         <div class="flex flex-col">
           <div class="bg-white rounded-lg p-4 shadow-sm max-w-2xl">
             <p class="text-gray-900">{{ welcomeMessage.content }}</p>
@@ -17,7 +17,7 @@
       <template v-for="message in messages" :key="message.id">
         <!-- AI 消息 -->
         <div v-if="message.type === 'ai'" class="flex items-start space-x-3">
-          <img src="@/assets/jj-avatar.svg" alt="JJ" class="w-10 h-10 rounded-full" />
+          <img src="@/assets/jj-avatar.png" alt="JJ" class="w-10 h-10 rounded-full" />
           <div class="flex flex-col">
             <div class="bg-white rounded-lg p-4 shadow-sm max-w-2xl">
               <p class="text-gray-900">{{ message.content }}</p>
@@ -51,7 +51,7 @@
 
       <!-- 输入提示 -->
       <div v-if="isTyping" class="flex items-start space-x-3">
-        <img src="@/assets/jj-avatar.svg" alt="JJ" class="w-10 h-10 rounded-full" />
+        <img src="@/assets/jj-avatar.png" alt="JJ" class="w-10 h-10 rounded-full" />
         <div class="bg-white rounded-lg p-4 shadow-sm">
           <div class="flex space-x-2">
             <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>

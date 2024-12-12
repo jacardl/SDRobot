@@ -7,7 +7,7 @@
     >
       <!-- 左侧欢迎区域 -->
       <div class="flex items-center">
-        <img class="h-8 w-8 rounded-full" src="@/assets/jj-avatar.svg" alt="JJ Avatar" />
+        <img class="h-8 w-8 rounded-full" src="@/assets/jj-avatar.png" alt="JJ Avatar" />
         <span class="ml-2 text-gray-700 group-hover:text-gray-900">{{ t('toolbar.greeting') }}</span>
       </div>
 

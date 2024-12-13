@@ -25,8 +25,7 @@ async function testCozeAPI() {
 
     const response = await aiService.generateResponse([{
       role: 'user',
-      content: 'Hello',
-      timestamp: Date.now()
+      content: 'Hello,你好'
     }])
     
     console.log('API Test Success:', response)

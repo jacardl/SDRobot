@@ -1,57 +1,50 @@
-import { Router } from 'express'
+import express from 'express'
+import { v4 as uuidv4 } from 'uuid'
 import { aiService } from '../services/aiService'
-import type { ChatMessage, ChatHistory } from '../types/chat'
 
-const router = Router()
+const router = express.Router()
 
-// 内存存储聊天历史（实际应用应该使用数据库）
-const chatHistories = new Map<string, ChatHistory>()
-
-// 创建新对话
-router.post('/chat/create', (req, res) => {
-  const id = Date.now().toString()
-  const now = Date.now()
-  
-  const history: ChatHistory = {
-    id,
-    messages: [],
-    createdAt: now,
-    updatedAt: now
-  }
-  
-  chatHistories.set(id, history)
-  res.json(history)
-})
+// 存储聊天历史
+const chatHistories = new Map<string, {
+  messages: any[]
+  createdAt: number
+  updatedAt: number
+}>()
 
 // 发送消息
 router.post('/chat', async (req, res) => {
   try {
-    // 1. 记录收到的请求
     console.log('=== Chat Request Start ===')
-    console.log('Received request:', {
-      body: req.body,
-      headers: req.headers
-    })
+    console.log('Request body:', req.body)
 
-    // 2. 记录调用 AI 服务前
-    console.log('Calling AI service...')
-    const result = await aiService.generateResponse(req.body.messages)
+    const { messages } = req.body
+    
+    if (!Array.isArray(messages)) {
+      return res.status(400).json({ 
+        error: 'Invalid request format. Messages array is required.' 
+      })
+    }
+
+    // 调用 AI 服务
+    console.log('Calling AI service with messages:', messages)
+    const result = await aiService.generateResponse(messages)
     console.log('AI service response:', result)
-    
-    // 3. 记录发送响应前
-    console.log('Sending response:', result)
-    console.log('=== Chat Request End ===')
-    
-    res.json({ message: result })
+
+    return res.json({ message: result })
+
   } catch (error: any) {
-    // 4. 记录错误详情
-    console.error('=== Chat Error ===')
-    console.error('Server Error:', {
+    console.error('Chat Error:', {
       message: error.message,
-      stack: error.stack,
-      response: error.response?.data
+      response: error.response?.data,
+      stack: error.stack
     })
-    res.status(500).json({ error: 'Internal Server Error', details: error.message })
+    
+    // 返回更详细的错误信息
+    return res.status(500).json({ 
+      error: 'AI Service Error',
+      message: error.message,
+      details: error.response?.data || error.stack
+    })
   }
 })
 
@@ -64,7 +57,12 @@ router.get('/chat/:conversationId', (req, res) => {
     return res.status(404).json({ error: 'Conversation not found' })
   }
   
-  res.json(history)
+  res.json({
+    id: conversationId,
+    messages: history.messages,
+    createdAt: history.createdAt,
+    updatedAt: history.updatedAt
+  })
 })
 
 export default router 

@@ -6,11 +6,14 @@
   "scripts": {
     "dev": "ts-node-dev --respawn src/app.ts",
     "build": "tsc",
-    "start": "node dist/app.js"
+    "start": "node dist/app.js",
+    "test:api": "ts-node src/test-api.ts",
+    "test": "npm run test:api"
   },
   "dependencies": {
+    "axios": "^1.7.9",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
+    "dotenv": "^16.4.7",
     "express": "^4.18.2",
     "openai": "^3.2.1"
   },

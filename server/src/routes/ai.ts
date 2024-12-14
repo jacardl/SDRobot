@@ -5,6 +5,13 @@ import { aiService } from '../services/aiService'
 const router = express.Router()
 
 router.post('/chat', async (req, res) => {
+  console.log('Received chat request:', {
+    url: req.url,
+    method: req.method,
+    body: req.body,
+    headers: req.headers
+  })
+  
   try {
     const eventEmitter = await aiService.generateResponse(req.body.messages)
     
@@ -16,19 +23,6 @@ router.post('/chat', async (req, res) => {
     // 转发事件到客户端
     eventEmitter.on('token', (token) => {
       res.write(`data: ${JSON.stringify({ event: 'conversation.message.delta', data: { role: 'assistant', type: 'answer', content: token } })}\n\n`)
-    })
-
-    eventEmitter.on('status', (status) => {
-      res.write(`data: ${JSON.stringify({ event: 'conversation.chat.in_progress', data: { status } })}\n\n`)
-    })
-
-    eventEmitter.on('complete', (content) => {
-      res.write(`data: ${JSON.stringify({ event: 'conversation.message.completed', data: { role: 'assistant', type: 'answer', content } })}\n\n`)
-    })
-
-    eventEmitter.on('error', (error) => {
-      res.write(`data: ${JSON.stringify({ event: 'error', data: { msg: error.message } })}\n\n`)
-      res.end()
     })
 
     eventEmitter.on('done', () => {

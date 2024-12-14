@@ -49,20 +49,29 @@ class AIService {
       const eventEmitter = new EventEmitter()
 
       // 发送请求
-      const response = await axios.post(
-        COZE_API_URL,
-        cozeRequest,
-        {
-          headers: {
-            'Authorization': `Bearer ${process.env.COZE_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          responseType: 'stream'
-        }
-      )
+      const response = await axios({
+        method: 'post',
+        url: COZE_API_URL,
+        data: cozeRequest,
+        headers: {
+          'Authorization': `Bearer ${process.env.COZE_API_KEY}`,
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream'
+        },
+        responseType: 'stream',
+        timeout: 30000,  // 30秒超时
+        maxRedirects: 5,
+        validateStatus: (status) => status < 500  // 只有状态码大于等于500时才认为是错误
+      })
+
+      // 添加调试日志
+      console.log('Coze API response status:', response.status)
+      console.log('Coze API response headers:', response.headers)
 
       // 处理流式响应
-      response.data.on('data', (chunk: Buffer) => {
+      const stream = response.data
+      stream.on('data', (chunk: Buffer) => {
+        console.log('Received chunk:', chunk.toString())  // 添加调试日志
         const lines = chunk.toString().split('\n')
         lines.forEach(line => {
           if (line.startsWith('data:')) {
@@ -71,35 +80,17 @@ class AIService {
               eventEmitter.emit('done')
               return
             }
-
+      
             try {
               const parsed: StreamChunk = JSON.parse(data)
               
               switch (parsed.event) {
-                case 'conversation.chat.created':
-                case 'conversation.chat.in_progress':
-                  eventEmitter.emit('status', parsed.data.status)
-                  break
-
                 case 'conversation.message.delta':
                   if (parsed.data.role === 'assistant' && parsed.data.type === 'answer') {
                     eventEmitter.emit('token', parsed.data.content)
                   }
                   break
-
-                case 'conversation.message.completed':
-                  if (parsed.data.role === 'assistant' && parsed.data.type === 'answer') {
-                    eventEmitter.emit('complete', parsed.data.content)
-                  }
-                  break
-
-                case 'conversation.chat.completed':
-                  eventEmitter.emit('end', parsed.data)
-                  break
-
-                case 'error':
-                  eventEmitter.emit('error', new Error(parsed.data.msg))
-                  break
+                // ... 其他事件处理
               }
             } catch (e) {
               console.warn('Failed to parse stream chunk:', data)
@@ -108,8 +99,23 @@ class AIService {
         })
       })
 
-      response.data.on('error', (error: Error) => {
+      stream.on('error', (error: Error) => {
+        console.error('Stream error:', error)
         eventEmitter.emit('error', error)
+      })
+
+      stream.on('end', () => {
+        console.log('Stream ended')  // 添加调试日志
+        eventEmitter.emit('done')
+      })
+
+      // 前端接收流式响应
+      eventEmitter.on('token', (token: string) => {
+        process.stdout.write(token) // 实时显示响应
+      })
+
+      eventEmitter.on('complete', (content: string) => {
+        console.log('\n\nFull message:', content)
       })
 
       return eventEmitter

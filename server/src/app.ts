@@ -64,3 +64,13 @@ process.on('SIGTERM', () => {
     process.exit(0)
   })
 })
+
+// server/src/app.ts
+app.use((req, res, next) => {
+  console.log('Request:', {
+    method: req.method,
+    path: req.path,
+    body: req.body
+  })
+  next()
+})

@@ -209,7 +209,7 @@ const sendMessage = async (content: string) => {
   // 添加用户消息
   messages.value.push({
     id: Date.now(),
-    type: 'user',
+    type: 'user' as const,
     content: content.trim(),
     timestamp: new Date()
   })
@@ -223,34 +223,50 @@ const sendMessage = async (content: string) => {
   try {
     // 创建新的 AI 消息
     const aiMessageId = Date.now()
-    messages.value.push({
+    const aiMessage = {
       id: aiMessageId,
-      type: 'ai',
+      type: 'ai' as const,
       content: '',
       timestamp: new Date()
-    })
+    }
+    messages.value.push(aiMessage)
 
     // 调用 AI 服务
-    console.log('Sending message to AI service:', content)
-    const response = await aiService.generateResponse([{
+    const eventEmitter = await aiService.generateResponse([{
       role: 'user',
-      content: content,
-      timestamp: Date.now()
+      content: content
     }])
-    console.log('AI service response:', response)
 
-    // 更新 AI 消息内容
-    const msgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
-    if (msgIndex !== -1) {
-      messages.value[msgIndex].content = response || 'Sorry, I could not generate a response.'
-    }
+    // 处理流式响应
+    let fullResponse = ''
+
+    eventEmitter.on('token', (token: string) => {
+      // 更新 AI 消息内容(实现打字机效果)
+      fullResponse += token
+      const msgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
+      if (msgIndex !== -1) {
+        messages.value[msgIndex].content = fullResponse
+      }
+    })
+
+    eventEmitter.on('error', (error: Error) => {
+      console.error('Chat Error:', error)
+      const msgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
+      if (msgIndex !== -1) {
+        messages.value[msgIndex].content = 'Sorry, I encountered an error. Please try again.'
+      }
+    })
+
+    eventEmitter.on('done', () => {
+      isTyping.value = false
+    })
 
   } catch (error) {
     console.error('Chat Error:', error)
     // 添加错误消息
     messages.value.push({
       id: Date.now(),
-      type: 'ai',
+      type: 'ai' as const,
       content: 'Sorry, I encountered an error. Please try again.',
       timestamp: new Date()
     })

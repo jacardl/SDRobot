@@ -4,9 +4,9 @@
   "description": "SDRobot backend server",
   "main": "dist/app.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn src/app.ts",
     "build": "tsc",
-    "start": "node dist/app.js",
+    "dev": "ts-node-dev --respawn src/app.ts",
+    "start": "ts-node src/app.ts",
     "test:api": "ts-node src/test-api.ts",
     "test": "npm run test:api"
   },
@@ -14,15 +14,18 @@
     "axios": "^1.7.9",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.18.2",
+    "express": "^4.21.2",
     "openai": "^3.2.1"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.13",
-    "@types/express": "^4.17.17",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
     "@types/node": "^18.15.11",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.0.4"
-  }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

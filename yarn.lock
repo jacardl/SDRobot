@@ -621,7 +621,7 @@ autoprefixer@^10.4.20:
     picocolors "^1.0.1"
     postcss-value-parser "^4.2.0"
 
-axios@^1.6.2:
+axios@^1.7.9:
   version "1.7.9"
   resolved "https://registry.npmmirror.com/axios/-/axios-1.7.9.tgz"
   integrity sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==
@@ -2213,7 +2213,7 @@ ts-node-dev@^2.0.0:
     ts-node "^10.4.0"
     tsconfig "^7.0.0"
 
-ts-node@^10.4.0, ts-node@>=9.0.0:
+ts-node@^10.4.0, ts-node@^10.9.2, ts-node@>=9.0.0:
   version "10.9.2"
   resolved "https://registry.npmmirror.com/ts-node/-/ts-node-10.9.2.tgz"
   integrity sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ==

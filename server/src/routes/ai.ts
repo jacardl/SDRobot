@@ -1,68 +1,47 @@
+// server/src/routes/ai.ts
 import express from 'express'
-import { v4 as uuidv4 } from 'uuid'
 import { aiService } from '../services/aiService'
 
 const router = express.Router()
 
-// 存储聊天历史
-const chatHistories = new Map<string, {
-  messages: any[]
-  createdAt: number
-  updatedAt: number
-}>()
-
-// 发送消息
 router.post('/chat', async (req, res) => {
   try {
-    console.log('=== Chat Request Start ===')
-    console.log('Request body:', req.body)
-
-    const { messages } = req.body
+    const eventEmitter = await aiService.generateResponse(req.body.messages)
     
-    if (!Array.isArray(messages)) {
-      return res.status(400).json({ 
-        error: 'Invalid request format. Messages array is required.' 
-      })
-    }
+    // 设置响应头
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.setHeader('Cache-Control', 'no-cache')
+    res.setHeader('Connection', 'keep-alive')
 
-    // 调用 AI 服务
-    console.log('Calling AI service with messages:', messages)
-    const result = await aiService.generateResponse(messages)
-    console.log('AI service response:', result)
+    // 转发事件到客户端
+    eventEmitter.on('token', (token) => {
+      res.write(`data: ${JSON.stringify({ event: 'conversation.message.delta', data: { role: 'assistant', type: 'answer', content: token } })}\n\n`)
+    })
 
-    return res.json({ message: result })
+    eventEmitter.on('status', (status) => {
+      res.write(`data: ${JSON.stringify({ event: 'conversation.chat.in_progress', data: { status } })}\n\n`)
+    })
+
+    eventEmitter.on('complete', (content) => {
+      res.write(`data: ${JSON.stringify({ event: 'conversation.message.completed', data: { role: 'assistant', type: 'answer', content } })}\n\n`)
+    })
+
+    eventEmitter.on('error', (error) => {
+      res.write(`data: ${JSON.stringify({ event: 'error', data: { msg: error.message } })}\n\n`)
+      res.end()
+    })
+
+    eventEmitter.on('done', () => {
+      res.write('data: [DONE]\n\n')
+      res.end()
+    })
 
   } catch (error: any) {
-    console.error('Chat Error:', {
-      message: error.message,
-      response: error.response?.data,
-      stack: error.stack
-    })
-    
-    // 返回更详细的错误信息
-    return res.status(500).json({ 
-      error: 'AI Service Error',
-      message: error.message,
-      details: error.response?.data || error.stack
+    res.status(500).json({
+      error: error.message,
+      details: error.response?.data
     })
   }
 })
 
-// 获取聊天历史
-router.get('/chat/:conversationId', (req, res) => {
-  const { conversationId } = req.params
-  const history = chatHistories.get(conversationId)
-  
-  if (!history) {
-    return res.status(404).json({ error: 'Conversation not found' })
-  }
-  
-  res.json({
-    id: conversationId,
-    messages: history.messages,
-    createdAt: history.createdAt,
-    updatedAt: history.updatedAt
-  })
-})
-
-export default router 
+export const aiRouter = router

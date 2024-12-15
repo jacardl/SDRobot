@@ -209,7 +209,7 @@ const sendMessage = async (content: string) => {
   // 添加用户消息
   messages.value.push({
     id: Date.now(),
-    type: 'user' as const,
+    type: 'user',
     content: content.trim(),
     timestamp: new Date()
   })
@@ -241,11 +241,29 @@ const sendMessage = async (content: string) => {
     let fullResponse = ''
 
     eventEmitter.on('token', (token: string) => {
-      // 更新 AI 消息内容(实现打字机效果)
-      fullResponse += token
-      const msgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
-      if (msgIndex !== -1) {
-        messages.value[msgIndex].content = fullResponse
+      // 如果token是事件数据，需要解析并提取实际内容
+      if (token.includes('event:') && token.includes('data:')) {
+        const lines = token.split('\n')
+        lines.forEach(line => {
+          if (line.startsWith('data:')) {
+            try {
+              const data = JSON.parse(line.substring(5).trim())
+              if (data.status === 'completed' || data.event === 'conversation.chat.completed') {
+                eventEmitter.emit('done')
+                return
+              }
+            } catch (e) {
+              // 忽略解析错误，继续处理下一行
+            }
+          }
+        })
+      } else {
+        // 更新 AI 消息内容
+        fullResponse += token
+        const msgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
+        if (msgIndex !== -1) {
+          messages.value[msgIndex].content = fullResponse
+        }
       }
     })
 
@@ -266,7 +284,7 @@ const sendMessage = async (content: string) => {
     // 添加错误消息
     messages.value.push({
       id: Date.now(),
-      type: 'ai' as const,
+      type: 'ai',
       content: 'Sorry, I encountered an error. Please try again.',
       timestamp: new Date()
     })

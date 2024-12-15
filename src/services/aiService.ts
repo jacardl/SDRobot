@@ -9,85 +9,70 @@ class AIService {
       console.log('Frontend sending request to:', `${API_URL}/api/ai/chat`)
       console.log('Request data:', { messages })
 
-      // 创建事件发射器
       const eventEmitter = new EventEmitter()
 
-      // 发送流式请求
       const response = await axios.post(
         `${API_URL}/api/ai/chat`,
-        {
-          messages: messages.map(msg => ({
-            role: msg.role,
-            content: msg.content,
-            timestamp: Date.now()
-          }))
-        },
+        { messages },
         {
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'text/event-stream'
           },
           responseType: 'stream'
         }
       )
 
-      // 处理流式响应
       response.data.on('data', (chunk: Buffer) => {
-        const lines = chunk.toString().split('\n')
-        lines.forEach(line => {
-          if (line.startsWith('data:')) {
-            const data = line.slice(5).trim()
-            if (data === '[DONE]') {
-              eventEmitter.emit('done')
-              return
-            }
+        const text = chunk.toString()
+        console.log('Frontend Received raw chunk:', text)  // 打印原始数据
 
+        // 检查数据是否以 'data: ' 开头
+        if (text.startsWith('data: ')) {
             try {
-              const parsed = JSON.parse(data)
-              
-              switch (parsed.event) {
-                case 'conversation.chat.created':
-                case 'conversation.chat.in_progress':
-                  eventEmitter.emit('status', parsed.data.status)
-                  break
-
-                case 'conversation.message.delta':
-                  if (parsed.data.role === 'assistant' && parsed.data.type === 'answer') {
-                    eventEmitter.emit('token', parsed.data.content)
-                  }
-                  break
-
-                case 'conversation.message.completed':
-                  if (parsed.data.role === 'assistant' && parsed.data.type === 'answer') {
-                    eventEmitter.emit('complete', parsed.data.content)
-                  }
-                  break
-
-                case 'conversation.chat.completed':
-                  eventEmitter.emit('end', parsed.data)
-                  break
-
-                case 'error':
-                  eventEmitter.emit('error', new Error(parsed.data.msg))
-                  break
-              }
+                // 去掉 'data: ' 前缀后再解析
+                const jsonStr = text.substring(6)  // 'data: ' 的长度是 6
+                const parsed = JSON.parse(jsonStr)
+                
+                if (parsed.event === 'conversation.message.delta' && parsed.data) {
+                    const { role, type, content } = parsed.data
+                    
+                    if (role === 'assistant' && type === 'answer') {
+                        // 发送内容
+                        eventEmitter.emit('token', content)
+                        
+                        // 如果内容中包含 conversation.chat.completed，发送完成信号
+                        if (content.includes('conversation.chat.completed')) {
+                            console.log('Chat completed')
+                            eventEmitter.emit('done')
+                        }
+                    }
+                }
             } catch (e) {
-              console.warn('Failed to parse stream chunk:', data)
+                console.warn('Parse error:', e)
+                console.warn('Failed to parse text:', text)  // 打印导致错误的文本
             }
-          }
-        })
+        } else {
+            console.log('Skipping non-data chunk')
+        }
       })
 
+      // 保持错误处理
       response.data.on('error', (error: Error) => {
+        console.error('Stream error:', error)
         eventEmitter.emit('error', error)
+      })
+
+      // 保持结束处理
+      response.data.on('end', () => {
+        console.log('Stream ended')
+        eventEmitter.emit('done')
       })
 
       return eventEmitter
 
     } catch (error: any) {
-      console.error('Frontend API Error:', {
-        message: error.message,
-        response: error.response?.data
-      })
+      console.error('Request error:', error)
       throw error
     }
   }

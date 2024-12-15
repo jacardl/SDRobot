@@ -71,32 +71,32 @@ class AIService {
       // 处理流式响应
       const stream = response.data
       stream.on('data', (chunk: Buffer) => {
-        console.log('Received chunk:', chunk.toString())  // 添加调试日志
-        const lines = chunk.toString().split('\n')
+        const text = chunk.toString()
+        
+        // 直接发送原始数据
+        eventEmitter.emit('token', text)
+
+        // 保留原有的处理逻辑以维持内部功能
+        const lines = text.split('\n')
         lines.forEach(line => {
-          if (line.startsWith('data:')) {
-            const data = line.slice(5).trim()
-            if (data === '[DONE]') {
-              eventEmitter.emit('done')
-              return
+          if (!line.trim()) return;
+          
+          const [eventPart, dataPart] = line.split('data:');
+          if (!dataPart) return;
+
+          try {
+            const eventType = eventPart.replace('event:', '').trim();
+            const data = dataPart.trim();
+            const parsed = JSON.parse(data);
+
+            // 当收到对话完成事件时发送完成信号
+            if (eventType === 'conversation.chat.completed') {
+              eventEmitter.emit('done');
             }
-      
-            try {
-              const parsed: StreamChunk = JSON.parse(data)
-              
-              switch (parsed.event) {
-                case 'conversation.message.delta':
-                  if (parsed.data.role === 'assistant' && parsed.data.type === 'answer') {
-                    eventEmitter.emit('token', parsed.data.content)
-                  }
-                  break
-                // ... 其他事件处理
-              }
-            } catch (e) {
-              console.warn('Failed to parse stream chunk:', data)
-            }
+          } catch (e) {
+            console.warn('Parse error:', e);
           }
-        })
+        });
       })
 
       stream.on('error', (error: Error) => {

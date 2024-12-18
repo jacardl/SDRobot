@@ -1,15 +1,32 @@
 import axios from 'axios'
 import { EventEmitter } from '../utils/EventEmitter'
+import { json } from 'stream/consumers'
+import { count, error } from 'console'
 
+// API 配置
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
+// 类型定义
+interface Message {
+  role: string
+  content: string
+}
+
+interface AIResponse {
+  output: string
+  error?: string
+}
+
 class AIService {
-  async generateResponse(messages: any[]): Promise<EventEmitter> {
+  private retryCount = 3
+  private retryDelay = 1000
+
+  async generateResponse(messages: Message[]): Promise<EventEmitter> {
+    const eventEmitter = new EventEmitter()
+
     try {
       console.log('Frontend sending request to:', `${API_URL}/api/ai/chat`)
       console.log('Request data:', { messages })
-
-      const eventEmitter = new EventEmitter()
 
       const response = await axios.post(
         `${API_URL}/api/ai/chat`,
@@ -23,49 +40,78 @@ class AIService {
         }
       )
 
-      response.data.on('data', (chunk: Buffer) => {
-        const text = chunk.toString()
-        console.log('Frontend Received raw chunk:', text)  // 打印原始数据
+      let accumulatedData = ''
 
-        // 检查数据是否以 'data: ' 开头
-        if (text.startsWith('data: ')) {
-            try {
-                // 去掉 'data: ' 前缀后再解析
-                const jsonStr = text.substring(6)  // 'data: ' 的长度是 6
-                const parsed = JSON.parse(jsonStr)
+      response.data.on('data', (chunk: Buffer) => {
+        try {
+          const rawChunk = chunk.toString()
+          console.log('Raw chunk received:', rawChunk)
+          
+          // 累积数据
+          accumulatedData += rawChunk
+          
+          // 按行分割
+          const lines = accumulatedData.split('\n')
+          
+          // 保留最后一个可能不完整的行
+          accumulatedData = lines.pop() || ''
+          
+          for (const line of lines) {
+            if (line.trim() === '') continue
+            
+            if (line.startsWith('data: ')) {
+              const dataContent = line.slice(6).trim()
+              
+              // 检查是否是结束标记
+              if (dataContent === '[DONE]') {
+                eventEmitter.emit('done')
+                continue
+              }
+
+              try {
+                // 尝试解析数据
+                const parsedData = JSON.parse(dataContent)
+                console.log('Parsed data:', parsedData)
                 
-                if (parsed.event === 'conversation.message.delta' && parsed.data) {
-                    const { role, type, content } = parsed.data
-                    
-                    if (role === 'assistant' && type === 'answer') {
-                        // 发送内容
-                        eventEmitter.emit('token', content)
-                        
-                        // 如果内容中包含 conversation.chat.completed，发送完成信号
-                        if (content.includes('conversation.chat.completed')) {
-                            console.log('Chat completed')
-                            eventEmitter.emit('done')
-                        }
-                    }
+                // 直接检查并使用 parsedData 中的内容
+                if (parsedData.data?.content) {
+                  if (typeof parsedData.data.content === 'string') {
+                    eventEmitter.emit('token', parsedData.data.content)
+                  } else if (parsedData.data.content.output) {
+                    eventEmitter.emit('token', parsedData.data.content.output)
+                  }
                 }
-            } catch (e) {
-                console.warn('Parse error:', e)
-                console.warn('Failed to parse text:', text)  // 打印导致错误的文本
+              } catch (parseError) {
+                console.log('Failed to parse data:', dataContent)
+                // 如果解析失败，尝试直接发送内容
+                if (dataContent && typeof dataContent === 'string') {
+                  eventEmitter.emit('token', dataContent)
+                }
+              }
             }
-        } else {
-            console.log('Skipping non-data chunk')
+          }
+        } catch (error) {
+          console.error('Chunk processing error:', error)
         }
       })
 
-      // 保持错误处理
       response.data.on('error', (error: Error) => {
         console.error('Stream error:', error)
         eventEmitter.emit('error', error)
       })
 
-      // 保持结束处理
       response.data.on('end', () => {
         console.log('Stream ended')
+        // 处理可能残留的数据
+        if (accumulatedData.trim()) {
+          console.log('Processing remaining data:', accumulatedData)
+          try {
+            const finalData = JSON.parse(accumulatedData)
+            eventEmitter.emit('message', finalData)
+          } catch (e) {
+            console.log('Could not parse remaining data')
+          }
+        }
         eventEmitter.emit('done')
       })
 
@@ -73,8 +119,21 @@ class AIService {
 
     } catch (error: any) {
       console.error('Request error:', error)
+      // 重试逻辑
+      if (this.retryCount > 0) {
+        this.retryCount--
+        console.log(`Retrying... ${this.retryCount} attempts remaining`)
+        await new Promise(resolve => setTimeout(resolve, this.retryDelay))
+        return this.generateResponse(messages)
+      }
+      eventEmitter.emit('error', error)
       throw error
     }
+  }
+
+  // 重置重试计数器
+  resetRetryCount() {
+    this.retryCount = 3
   }
 }
 

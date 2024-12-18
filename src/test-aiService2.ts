@@ -27,7 +27,7 @@ async function testAiService() {
         eventEmitter.on('token', (token: string) => {
           console.log('\n=== Received Token ===')
           console.log('Raw token:', token)
-          console.log('Token length:', token.length)
+          //console.log('Token length:', token.length)
           console.log('Token type:', typeof token)
           fullResponse += token
         })
@@ -41,7 +41,7 @@ async function testAiService() {
         eventEmitter.on('complete', (content: string) => {
           console.log('\n=== Complete Message ===')
           console.log('Content:', content)
-          console.log('Content length:', content.length)
+          //console.log('Content length:', content.length)
         })
 
         // 监听结束事件

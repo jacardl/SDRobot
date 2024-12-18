@@ -216,12 +216,10 @@ const sendMessage = async (content: string) => {
 
   // 清空输入框
   newMessage.value = ''
-
-  // 显示输入提示
   isTyping.value = true
 
   try {
-    // 创建新的 AI 消息
+    // 创建AI消息占位
     const aiMessageId = Date.now()
     const aiMessage = {
       id: aiMessageId,
@@ -231,7 +229,7 @@ const sendMessage = async (content: string) => {
     }
     messages.value.push(aiMessage)
 
-    // 调用 AI 服务
+    // 调用AI服务
     const eventEmitter = await aiService.generateResponse([{
       role: 'user',
       content: content
@@ -241,29 +239,11 @@ const sendMessage = async (content: string) => {
     let fullResponse = ''
 
     eventEmitter.on('token', (token: string) => {
-      // 如果token是事件数据，需要解析并提取实际内容
-      if (token.includes('event:') && token.includes('data:')) {
-        const lines = token.split('\n')
-        lines.forEach(line => {
-          if (line.startsWith('data:')) {
-            try {
-              const data = JSON.parse(line.substring(5).trim())
-              if (data.status === 'completed' || data.event === 'conversation.chat.completed') {
-                eventEmitter.emit('done')
-                return
-              }
-            } catch (e) {
-              // 忽略解析错误，继续处理下一行
-            }
-          }
-        })
-      } else {
-        // 更新 AI 消息内容
-        fullResponse += token
-        const msgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
-        if (msgIndex !== -1) {
-          messages.value[msgIndex].content = fullResponse
-        }
+      console.log('Received token:', token)
+      fullResponse += token
+      const msgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
+      if (msgIndex !== -1) {
+        messages.value[msgIndex].content = fullResponse
       }
     })
 
@@ -281,7 +261,6 @@ const sendMessage = async (content: string) => {
 
   } catch (error) {
     console.error('Chat Error:', error)
-    // 添加错误消息
     messages.value.push({
       id: Date.now(),
       type: 'ai',

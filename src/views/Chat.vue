@@ -7,9 +7,8 @@
         <img src="@/assets/jj-avatar.png" alt="JJ" class="w-10 h-10 rounded-full" />
         <div class="flex flex-col">
           <div class="bg-white rounded-lg p-4 shadow-sm max-w-2xl">
-            <p class="text-gray-900">{{ welcomeMessage.content }}</p>
+            <p class="text-gray-900">{{ welcomeMessage }}</p>
           </div>
-          <span class="text-xs text-gray-500 mt-1">{{ formatTime(welcomeMessage.timestamp) }}</span>
         </div>
       </div>
 
@@ -26,7 +25,7 @@
                 <button
                   v-for="reply in message.quickReplies"
                   :key="reply"
-                  @click="sendMessage(reply)"
+                  @click="() => sendMessage(reply)"
                   class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 transition-colors"
                 >
                   {{ reply }}
@@ -84,7 +83,7 @@
           </div>
         </div>
         <button
-          @click="sendMessage(newMessage)"
+          @click="() => sendMessage()"
           :disabled="!newMessage.trim()"
           class="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
@@ -98,8 +97,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted } from 'vue'
-import { aiService } from '@/services/aiService'
+import { constructFromSymbol } from 'date-fns/constants';
+import { ref, onMounted } from 'vue'
 
 interface Message {
   id: number
@@ -109,35 +108,13 @@ interface Message {
   quickReplies?: string[]
 }
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 const messages = ref<Message[]>([])
 const newMessage = ref('')
-const isTyping = ref(false)
+const isLoading = ref(false)
 const chatContainer = ref<HTMLElement | null>(null)
-
-// 初始欢迎消息
-const welcomeMessage = {
-  id: Date.now(),
-  type: 'ai' as const,
-  content: "👋 Welcome! I'm JJ, your digital sales assistant. I'm here to help you manage leads and boost your sales performance. How can I assist you today?",
-  timestamp: new Date()
-}
-
-// 初始化对话
-const startNewChat = () => {
-  messages.value = []
-  newMessage.value = ''
-  isTyping.value = false
-  nextTick(() => {
-    if (chatContainer.value) {
-      chatContainer.value.scrollTop = 0
-    }
-  })
-}
-
-// 在组件挂载时初始化对话
-onMounted(() => {
-  startNewChat()
-})
+const welcomeMessage = "👋 Hi! I'm your AI assistant. How can I help you today?"
+const isTyping = ref(false)
 
 // 格式化时间
 const formatTime = (date: Date) => {
@@ -147,129 +124,120 @@ const formatTime = (date: Date) => {
   }).format(date)
 }
 
-// 处理键盘事件
-const handleKeyDown = (e: KeyboardEvent) => {
-  if (newMessage.value.trim()) {
-    sendMessage(newMessage.value)
+// 处理流式响应
+const handleStreamResponse = async (response: Response, aiMessageId: number) => {
+  const reader = response.body?.getReader()
+  if (!reader) throw new Error('No reader available')
+
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || ''
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(5).trim()
+          if (data === '[DONE]') continue
+
+          try {
+            const parsedData = JSON.parse(data)
+            console.log('Parsed data:', parsedData)
+            
+            // 处理不同类型的事件
+            if (parsedData.event === 'conversation.message.delta') {
+              if (parsedData.data?.content) {
+                // 解析实际的内容
+                const content = parsedData.data.content
+                if (content.includes('event:') && content.includes('data:')) {
+                  // 这是一个事件消息，进一步解析
+                  const eventLines = content.split('\n')
+                  for (const eventLine of eventLines) {
+                    if (eventLine.startsWith('data:')) {
+                      try {
+                        const eventData = JSON.parse(eventLine.slice(5))
+                        console.log('Parsed event data:', eventData)
+                        if (eventData.content) {
+                          console.log('Received content:', eventData.content)
+                          const parseOutput = JSON.parse(eventData.content)
+                          const output = parseOutput.output
+                          console.log('Received output:', parseOutput.output)
+                          const msgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
+                          if (msgIndex !== -1) {
+                            messages.value[msgIndex].content += output
+                            scrollToBottom()
+                          }
+                        }
+                      } catch (e) {
+                        console.warn('Failed to parse event data:', e)
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            console.warn('Failed to parse SSE message:', e)
+          }
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock()
   }
 }
-
-// 自动调整输入框高度
-const handleInput = (e: Event) => {
-  const textarea = e.target as HTMLTextAreaElement
-  textarea.style.height = 'auto'
-  textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`
-}
-
-// 监听输入事件
-watch(newMessage, () => {
-  nextTick(() => {
-    const textarea = document.querySelector('textarea')
-    if (textarea) {
-      textarea.style.height = 'auto'
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`
-    }
-  })
-})
-
-// 设置侧边栏宽度变量
-onMounted(() => {
-  const updateSidebarWidth = () => {
-    const isCollapsed = localStorage.getItem('sideNavCollapsed') === 'true'
-    document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '4rem' : '16rem')
-  }
-  
-  updateSidebarWidth()
-  window.addEventListener('storage', updateSidebarWidth)
-})
-
-// 滚动到最新消息
-const scrollToBottom = () => {
-  nextTick(() => {
-    if (chatContainer.value) {
-      chatContainer.value.scrollTop = chatContainer.value.scrollHeight
-    }
-  })
-}
-
-// 监听消息列表变化，自动滚动到底部
-watch(messages, () => {
-  scrollToBottom()
-}, { deep: true })
-
-// 监听打字状态变化，自动滚动到底部
-watch(isTyping, () => {
-  scrollToBottom()
-})
 
 // 发送消息
-const sendMessage = async (content: string) => {
-  if (!content.trim()) return
+const sendMessage = async (content?: string) => {
+  const messageContent = content || newMessage.value.trim()
+  if (!messageContent || isLoading.value) return
 
-  // 添加用户消息
+  // 使用 messageContent 替代之前的 content
   messages.value.push({
     id: Date.now(),
     type: 'user',
-    content: content.trim(),
+    content: messageContent,
     timestamp: new Date()
   })
 
-  // 清空输入框
+  // 清空输入框并设置加载状态
   newMessage.value = ''
-  isTyping.value = true
+  isLoading.value = true
+  scrollToBottom()
 
   try {
-    // 创建AI消息占位
+    // 创建 AI 消息占位
     const aiMessageId = Date.now()
-    const aiMessage = {
+    messages.value.push({
       id: aiMessageId,
-      type: 'ai' as const,
+      type: 'ai',
       content: '',
       timestamp: new Date()
-    }
-    messages.value.push(aiMessage)
+    })
 
-    // 调用AI服务
-    const eventEmitter = await aiService.generateResponse([{
-      role: 'user',
-      content: content
-    }])
-
-    // 处理流式响应
-    let fullResponse = ''
-
-    eventEmitter.on('token', (token: string) => {
-      console.log('Chat.vue received token:', {
-        token,
-        type: typeof token,
-        length: token.length,
-        raw: JSON.stringify(token)
+    // 发送请求
+    const response = await fetch(`${API_URL}/api/ai/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream'
+      },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: messageContent }]
       })
-      
-      // 确保 token 是字符串
-      const tokenStr = String(token)
-      fullResponse += tokenStr
-      
-      const msgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
-      if (msgIndex !== -1) {
-        messages.value[msgIndex].content = fullResponse
-      }
     })
 
-    eventEmitter.on('error', (error: Error) => {
-      console.error('Chat Error:', error)
-      const msgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
-      if (msgIndex !== -1) {
-        messages.value[msgIndex].content = 'Sorry, I encountered an error. Please try again.'
-      }
-    })
-
-    eventEmitter.on('done', () => {
-      isTyping.value = false
-    })
+    if (!response.ok) throw new Error('Network response was not ok')
+    await handleStreamResponse(response, aiMessageId)
 
   } catch (error) {
-    console.error('Chat Error:', error)
+    console.error('Chat error:', error)
     messages.value.push({
       id: Date.now(),
       type: 'ai',
@@ -277,8 +245,38 @@ const sendMessage = async (content: string) => {
       timestamp: new Date()
     })
   } finally {
-    isTyping.value = false
+    isLoading.value = false
+    scrollToBottom()
   }
+}
+
+// 自动滚动到底部
+const scrollToBottom = () => {
+  setTimeout(() => {
+    if (chatContainer.value) {
+      chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+    }
+  }, 0)
+}
+
+// 监听消息变化，自动滚动
+onMounted(() => {
+  scrollToBottom()
+})
+
+// 处理键盘事件
+const handleKeyDown = (e: KeyboardEvent) => {
+  if (newMessage.value.trim()) {
+    sendMessage()
+  }
+}
+
+// 初始化对话
+const startNewChat = () => {
+  messages.value = []
+  newMessage.value = ''
+  isLoading.value = false
+  scrollToBottom()
 }
 </script>
 
@@ -308,7 +306,7 @@ const sendMessage = async (content: string) => {
   border-radius: 3px;
 }
 
-/* 输入框自动调整高��� */
+/* 输入框自动调��高度 */
 textarea {
   overflow-y: hidden;
 }

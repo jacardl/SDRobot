@@ -1,4 +1,4 @@
-import axios from 'axios'
+
 import { EventEmitter } from '../utils/EventEmitter'
 import { json } from 'stream/consumers'
 import { count, error } from 'console'
@@ -28,40 +28,42 @@ class AIService {
       console.log('Frontend sending request to:', `${API_URL}/api/ai/chat`)
       console.log('Request data:', { messages })
 
-      const response = await axios.post(
-        `${API_URL}/api/ai/chat`,
-        { messages },
-        {
+      const response = await fetch(`${API_URL}/api/ai/chat`, {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'text/event-stream'
           },
-          responseType: 'stream'
+          body: JSON.stringify({ messages })
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
         }
-      )
+    
+        if (!response.body) {
+          throw new Error('Response body is null')
+        }
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let accumulatedData = ''
+        while(true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          const chunk = decoder.decode(value, { stream: true })
+          console.log('Raw chunk received:', chunk)
 
-      let accumulatedData = ''
-
-      response.data.on('data', (chunk: Buffer) => {
-        try {
-          const rawChunk = chunk.toString()
-          console.log('Raw chunk received:', rawChunk)
-          
-          // 累积数据
-          accumulatedData += rawChunk
-          
+          accumulatedData += chunk
           // 按行分割
           const lines = accumulatedData.split('\n')
-          
           // 保留最后一个可能不完整的行
           accumulatedData = lines.pop() || ''
-          
+
           for (const line of lines) {
             if (line.trim() === '') continue
-            
+
             if (line.startsWith('data: ')) {
               const dataContent = line.slice(6).trim()
-              
               // 检查是否是结束标记
               if (dataContent === '[DONE]') {
                 eventEmitter.emit('done')
@@ -76,7 +78,7 @@ class AIService {
                 // 直接检查并使用 parsedData 中的内容
                 if (parsedData.data?.content) {
                   if (typeof parsedData.data.content === 'string') {
-                    eventEmitter.emit('token', parsedData.data.content)
+                    eventEmitter.emit('message', parsedData.data.content)
                   } else if (parsedData.data.content.output) {
                     eventEmitter.emit('token', parsedData.data.content.output)
                   }
@@ -90,51 +92,15 @@ class AIService {
               }
             }
           }
+        }
+        return eventEmitter
+
         } catch (error) {
-          console.error('Chunk processing error:', error)
+          console.error('Request error:', error)
+          eventEmitter.emit('error', error)
+          throw error
         }
-      })
-
-      response.data.on('error', (error: Error) => {
-        console.error('Stream error:', error)
-        eventEmitter.emit('error', error)
-      })
-
-      response.data.on('end', () => {
-        console.log('Stream ended')
-        // 处理可能残留的数据
-        if (accumulatedData.trim()) {
-          console.log('Processing remaining data:', accumulatedData)
-          try {
-            const finalData = JSON.parse(accumulatedData)
-            eventEmitter.emit('message', finalData)
-          } catch (e) {
-            console.log('Could not parse remaining data')
-          }
-        }
-        eventEmitter.emit('done')
-      })
-
-      return eventEmitter
-
-    } catch (error: any) {
-      console.error('Request error:', error)
-      // 重试逻辑
-      if (this.retryCount > 0) {
-        this.retryCount--
-        console.log(`Retrying... ${this.retryCount} attempts remaining`)
-        await new Promise(resolve => setTimeout(resolve, this.retryDelay))
-        return this.generateResponse(messages)
-      }
-      eventEmitter.emit('error', error)
-      throw error
     }
   }
-
-  // 重置重试计数器
-  resetRetryCount() {
-    this.retryCount = 3
-  }
-}
 
 export const aiService = new AIService()

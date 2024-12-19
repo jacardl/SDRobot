@@ -22,4 +22,12 @@ export class EventEmitter {
       this.events[event] = this.events[event].filter(l => l !== listener);
     }
   }
+
+  eventNames(): string[] {
+    return Object.keys(this.events);
+  }
+
+  listenerCount(event: string): number {
+    return this.events[event]?.length || 0;
+  }
 }

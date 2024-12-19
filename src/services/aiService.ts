@@ -1,4 +1,3 @@
-
 import { EventEmitter } from '../utils/EventEmitter'
 import { json } from 'stream/consumers'
 import { count, error } from 'console'
@@ -49,14 +48,16 @@ class AIService {
         let accumulatedData = ''
         while(true) {
           const { done, value } = await reader.read()
-          if (done) break
+          if (done) {
+            eventEmitter.emit('done')
+            break
+          }
+          
           const chunk = decoder.decode(value, { stream: true })
           console.log('Raw chunk received:', chunk)
 
           accumulatedData += chunk
-          // 按行分割
           const lines = accumulatedData.split('\n')
-          // 保留最后一个可能不完整的行
           accumulatedData = lines.pop() || ''
 
           for (const line of lines) {
@@ -64,43 +65,80 @@ class AIService {
 
             if (line.startsWith('data: ')) {
               const dataContent = line.slice(6).trim()
+              
               // 检查是否是结束标记
               if (dataContent === '[DONE]') {
                 eventEmitter.emit('done')
-                continue
+                return eventEmitter
               }
 
               try {
-                // 尝试解析数据
                 const parsedData = JSON.parse(dataContent)
                 console.log('Parsed data:', parsedData)
                 
-                // 直接检查并使用 parsedData 中的内容
-                if (parsedData.data?.content) {
-                  if (typeof parsedData.data.content === 'string') {
-                    eventEmitter.emit('message', parsedData.data.content)
-                  } else if (parsedData.data.content.output) {
-                    eventEmitter.emit('token', parsedData.data.content.output)
+                // 处理不同类型的事件
+                if (parsedData.event === 'conversation.message.delta') {
+                  if (parsedData.data?.content) {
+                    // 解析实际的内容
+                    const content = parsedData.data.content
+                    if (content.includes('event:') && content.includes('data:')) {
+                      // 这是一个事件消息，进一步解析
+                      const eventLines = content.split('\n')
+                      for (const eventLine of eventLines) {
+                        if (eventLine.startsWith('data:')) {
+                          try {
+                            const eventData = JSON.parse(eventLine.slice(5))
+                            // 检查不同的数据结构
+                            if (eventData.output) {
+                              eventEmitter.emit('token', eventData.output)
+                              console.log('eventData.output:', eventData.output)
+                            } else if (eventData.content) {
+                              try {
+                                // 尝试解析 content 字段
+                                const contentData = JSON.parse(eventData.content)
+                                console.log('Content data:', contentData)
+                                if (contentData.msg_type === 'generate_answer_finish') {
+                                  eventEmitter.emit('done')
+                                } else if (contentData.output) {
+                                  console.log('Preparing to emit token:', {
+                                    content: contentData.output,
+                                    type: typeof contentData.output
+                                  })
+                                  eventEmitter.emit('token', String(contentData.output))
+                                } 
+                              } catch (e) {
+                                // 如果 content 不是 JSON，直接发送
+                                eventEmitter.emit('token', eventData.content)
+                              }
+                            }
+                          } catch (e) {
+                            // 如果解析失败，发送原始内容
+                            eventEmitter.emit('token', eventLine.slice(5))
+                          }
+                        }
+                      }
+                    } else {
+                      // 直接发送内容
+                      eventEmitter.emit('token', content)
+                    }
                   }
                 }
               } catch (parseError) {
-                console.log('Failed to parse data:', dataContent)
-                // 如果解析失败，尝试直接发送内容
-                if (dataContent && typeof dataContent === 'string') {
-                  eventEmitter.emit('token', dataContent)
-                }
+                console.error('Parse error:', parseError)
+                eventEmitter.emit('error', parseError)
               }
             }
           }
         }
+        
         return eventEmitter
 
-        } catch (error) {
-          console.error('Request error:', error)
-          eventEmitter.emit('error', error)
-          throw error
-        }
+    } catch (error) {
+      console.error('Request error:', error)
+      eventEmitter.emit('error', error)
+      throw error
     }
   }
+}
 
 export const aiService = new AIService()

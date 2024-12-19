@@ -239,8 +239,17 @@ const sendMessage = async (content: string) => {
     let fullResponse = ''
 
     eventEmitter.on('token', (token: string) => {
-      console.log('Received token:', token)
-      fullResponse += token
+      console.log('Chat.vue received token:', {
+        token,
+        type: typeof token,
+        length: token.length,
+        raw: JSON.stringify(token)
+      })
+      
+      // 确保 token 是字符串
+      const tokenStr = String(token)
+      fullResponse += tokenStr
+      
       const msgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
       if (msgIndex !== -1) {
         messages.value[msgIndex].content = fullResponse
@@ -299,7 +308,7 @@ const sendMessage = async (content: string) => {
   border-radius: 3px;
 }
 
-/* 输入框自动调整高度 */
+/* 输入框自动调整高��� */
 textarea {
   overflow-y: hidden;
 }

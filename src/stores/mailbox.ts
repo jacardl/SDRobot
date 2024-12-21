@@ -7,6 +7,7 @@ import {
   getStatusFromHealth, 
   createDefaultMailbox 
 } from '@/data/mailboxData'
+import type { GmailMailbox } from '@/services/mailbox'
 
 export const useMailboxStore = defineStore('mailbox', () => {
   const mailboxes = ref<Mailbox[]>([])
@@ -58,10 +59,8 @@ export const useMailboxStore = defineStore('mailbox', () => {
   }
 
   // 添加邮箱
-  const addMailbox = (email: string) => {
-    if (canAddMore.value && !mailboxes.value.find(m => m.email === email)) {
-      mailboxes.value.push(createDefaultMailbox(email))
-    }
+  const addMailbox = (mailbox: Mailbox | GmailMailbox) => {
+    mailboxes.value.push(mailbox)
   }
 
   // 移除邮箱
@@ -109,6 +108,11 @@ export const useMailboxStore = defineStore('mailbox', () => {
     }
   }
 
+  // 添加计算属性
+  const enabledMailboxes = computed(() => 
+    mailboxes.value.filter(mailbox => mailbox.enabled)
+  )
+
   return {
     mailboxes,
     loading,
@@ -125,6 +129,7 @@ export const useMailboxStore = defineStore('mailbox', () => {
     updateMailboxStatus,
     updateMailboxHealth,
     updateMailboxCapacity,
-    toggleMailboxEnabled
+    toggleMailboxEnabled,
+    enabledMailboxes  // 导出计算属性
   }
 }) 

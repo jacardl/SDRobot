@@ -1,47 +1,52 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50">
+  <div class="flex items-center justify-center min-h-screen">
     <div class="text-center">
-      <div v-if="error" class="p-8 text-center text-red-500">
-        <ExclamationCircleIcon class="h-12 w-12 mx-auto" />
-        <h3 class="mt-2 text-lg font-medium text-gray-900">Authentication Failed</h3>
-        <p class="mt-1 text-sm text-gray-500">{{ error }}</p>
-        <button
-          @click="$router.push('/mailboxes')"
-          class="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-        >
-          Return to Mailboxes
-        </button>
-      </div>
-      <div v-else class="p-8">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-        <p class="mt-4 text-gray-500">Connecting your mailbox...</p>
-      </div>
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+      <p class="mt-4">Connecting your Gmail account...</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { ExclamationCircleIcon } from '@heroicons/vue/24/outline'
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useMailboxStore } from '@/stores/mailbox'
 import { mailboxService } from '@/services/mailbox'
+import type { GmailMailbox } from '@/services/mailbox'
 
 const router = useRouter()
-const route = useRoute()
-const error = ref<string | null>(null)
+const mailboxStore = useMailboxStore()
 
 onMounted(async () => {
-  const code = route.query.code as string
-  if (!code) {
-    error.value = 'No authorization code provided'
-    return
-  }
-
   try {
-    await mailboxService.handleCallback(code)
+    // 获取授权码和状态
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+    const state = params.get('state')
+    
+    // 验证状态（防止 CSRF）
+    const savedState = localStorage.getItem('gmail_auth_state')
+    if (state !== savedState) {
+      throw new Error('Invalid state')
+    }
+
+    if (!code) throw new Error('No authorization code')
+
+    // 处理授权回调
+    const mailboxData = await mailboxService.handleGmailCallback(code)
+    
+    // 添加到 store (移除 JSON.stringify)
+    await mailboxStore.addMailbox(mailboxData as GmailMailbox)
+    
+    // 清理状态
+    localStorage.removeItem('gmail_auth_state')
+    localStorage.removeItem('gmail_auth_pending')
+    
+    // 重定向回邮箱页面
     router.push('/mailboxes')
-  } catch (e) {
-    error.value = 'Failed to authenticate with Google. Please try again.'
+  } catch (error) {
+    console.error('OAuth callback error:', error)
+    router.push('/mailboxes?error=auth_failed')
   }
 })
 </script> 

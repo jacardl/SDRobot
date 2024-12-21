@@ -14,6 +14,7 @@ export interface Mailbox {
   status: 'Healthy' | 'Warning' | 'Urgent Issues'
   health: number // 0-100
   statusChecks: MailboxStatus
+  provider?: 'gmail' | 'outlook' | 'other'
 }
 
 // 默认邮箱数据

@@ -23,6 +23,46 @@
       </button>
     </div>
 
+    <!-- Gmail 连接选项 -->
+    <div class="mb-6 bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-medium text-gray-900">Gmail Integration</h3>
+          <p class="text-sm text-gray-500">Connect your Gmail account to manage emails</p>
+        </div>
+        <button
+          @click="connectGmail"
+          :disabled="!mailboxStore.canAddMore"
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <PlusIcon class="h-5 w-5 mr-2" />
+          Connect Gmail
+        </button>
+      </div>
+      
+      <!-- Gmail 连接状态 -->
+      <div v-if="connectedGmailAccounts.length > 0" class="mt-4 space-y-3">
+        <div v-for="account in connectedGmailAccounts" :key="account.email" 
+             class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div class="flex items-center space-x-3">
+            <div class="flex-shrink-0">
+              <EnvelopeIcon class="h-6 w-6 text-gray-400" />
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-900">{{ account.email }}</p>
+              <p class="text-xs text-gray-500">Gmail Account</p>
+            </div>
+          </div>
+          <button
+            @click="() => confirmDisconnect(account)"
+            class="text-sm text-red-600 hover:text-red-700"
+          >
+            Disconnect
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- 邮箱列表 -->
     <div class="mt-8 bg-white rounded-lg shadow overflow-hidden">
       <div v-if="mailboxStore.loading" class="p-8 text-center text-gray-500">
@@ -325,7 +365,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import {
   Dialog,
   DialogPanel,
@@ -355,19 +395,58 @@ const mailboxToDisconnect = ref<Mailbox | null>(null)
 const hoveredMailbox = ref<string | null>(null)
 const tooltipTriggerRef = ref<HTMLElement | undefined>(undefined)
 
-// 连接Gmail
+// 获取已连接的 Gmail 账户
+const connectedGmailAccounts = computed(() => 
+  mailboxStore.mailboxes.filter(m => m.provider === 'gmail')
+)
+
+// 连接 Gmail
 const connectGmail = async () => {
   try {
-    const authUrl = mailboxService.getAuthUrl()
+    // 检查是否可以添加更多邮箱
+    if (!mailboxStore.canAddMore) {
+      console.warn('Maximum mailbox limit reached')
+      return
+    }
+
+    // 使用环境变量中的配置获取授权 URL
+    const authUrl = mailboxService.getGmailAuthUrl()
+    
+    // 记录当前状态（可选）
+    localStorage.setItem('gmail_auth_pending', 'true')
+    
+    // 重定向到 Google 授权页面
     window.location.href = authUrl
   } catch (error) {
     console.error('Failed to connect Gmail:', error)
   }
 }
 
+// 断开 Gmail 连接
+const disconnectGmail = async (account: any) => {
+  try {
+    // 从 store 中移除邮箱
+    mailboxStore.removeMailbox(account.email)
+    
+    // 清除相关的本地存储
+    localStorage.removeItem(`gmail_token_${account.email}`)
+    
+    // 可选：通知后端清除令牌
+    await fetch(`${import.meta.env.VITE_API_URL}/api/gmail/disconnect`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email: account.email })
+    })
+  } catch (error) {
+    console.error('Failed to disconnect Gmail:', error)
+  }
+}
+
 // 确认断开连接
-const confirmDisconnect = (mailbox: Mailbox) => {
-  mailboxToDisconnect.value = mailbox
+const confirmDisconnect = (account: any) => {
+  mailboxToDisconnect.value = account
 }
 
 // 断开邮箱连接
@@ -420,6 +499,13 @@ const hideTooltip = () => {
 
 // 初始化
 onMounted(() => {
+  // 检查是否有待处理的 Gmail 授权
+  const pendingAuth = localStorage.getItem('gmail_auth_pending')
+  if (pendingAuth) {
+    localStorage.removeItem('gmail_auth_pending')
+    // 可以显示一个提示或者执行其他操作
+  }
+  
   mailboxStore.loadMailboxes()
 })
 </script>

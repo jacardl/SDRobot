@@ -200,7 +200,7 @@ const handleStreamResponse = async (response: Response, aiMessageId: number) => 
             const parsedData = JSON.parse(data)
             //console.log('Parsed data:', parsedData)
             
-            // 处理不同类��的事件
+            // 处理不同类型的事件
             if (parsedData.event === 'conversation.message.delta') {
               if (parsedData.data?.content) {
                 // 解析实际的内容
@@ -524,14 +524,16 @@ textarea::-webkit-resizer {
   display: none;
 }
 
-/* 添加动画样式 */
+/* 修改动画样式，移除 @apply */
+.animate-pulse {
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  display: inline-block;
+  margin-left: 0.125rem;
+  margin-right: 0.125rem;
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 0.2; }
   50% { opacity: 1; }
-}
-
-.animate-pulse {
-  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  @apply inline-block mx-0.5;
 }
 </style> 

@@ -4,7 +4,7 @@
     <!-- 聊天区域 - 使用 grid 确保正确的滚动行为 -->
     <div 
       ref="chatContainer"
-      class="overflow-y-auto scroll-smooth"
+      class="overflow-y-auto scroll-smooth relative"
     >
       <div class="max-w-4xl mx-auto p-4 space-y-4">
         <!-- 欢迎消息 -->
@@ -33,8 +33,20 @@
                     ? displayContents[message.id] || message.content
                     : message.content 
                   }}
-                  <span v-if="isTyping && message.id === messages[messages.length - 1].id" 
-                        class="inline-block w-2 h-4 bg-gray-400 animate-pulse">
+                  <!-- 添加等待动画 -->
+                  <span 
+                    v-if="isLoading && message.id === messages[messages.length - 1].id && !message.content" 
+                    class="inline-flex items-center"
+                  >
+                    <span class="animate-pulse">.</span>
+                    <span class="animate-pulse" style="animation-delay: 200ms">.</span>
+                    <span class="animate-pulse" style="animation-delay: 400ms">.</span>
+                  </span>
+                  <!-- 打字机光标 -->
+                  <span 
+                    v-else-if="isTyping && message.id === messages[messages.length - 1].id" 
+                    class="inline-block w-2 h-4 bg-gray-400 animate-pulse ml-1"
+                  >
                   </span>
                 </p>
                 <!-- 快捷回复按钮 -->
@@ -65,42 +77,53 @@
           </div>
         </template>
       </div>
+
+      <!-- 停止按钮 -->
+      <div 
+        v-if="isLoading || isTyping" 
+        class="sticky bottom-4 left-0 right-0 flex justify-center z-50"
+      >
+        <button
+          @click="stopResponse"
+          class="inline-flex items-center px-6 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-full shadow-sm transition-colors"
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            class="h-4 w-4 text-gray-600" 
+            viewBox="0 0 24 24" 
+            fill="currentColor"
+          >
+            <rect x="7" y="7" width="10" height="10" />
+          </svg>
+          <span class="text-sm font-medium text-gray-600 ml-2">停止</span>
+        </button>
+      </div>
     </div>
 
-    <!-- 输入区域 - 使用 grid 自动定位在底部 -->
+    <!-- 输入区域 -->
     <div class="border-t border-gray-200 bg-white p-4">
-      <div class="max-w-4xl mx-auto flex items-center space-x-4">
-        <div class="flex-1 relative">
-          <div class="relative flex items-center">
-            <textarea
-              v-model="newMessage"
-              @keydown="handleKeyDown"
-              @keydown.shift.enter.prevent="startNewChat"
-              rows="1"
-              class="block w-full pl-4 pr-20 py-3 text-gray-900 rounded-full border-gray-200 shadow-sm focus:border-primary focus:ring-primary resize-none"
-              placeholder="Type your message..."
-              style="min-height: 44px; max-height: 120px;"
-            ></textarea>
-            <div class="absolute right-3 text-xs text-gray-400 pointer-events-none select-none">
-              Press Enter to send
-              <br />
-              Shift + Enter for new chat
+      <div class="max-w-4xl mx-auto">
+        <!-- 输入框和发送按钮 -->
+        <div class="flex items-center space-x-4">
+          <div class="flex-1 relative">
+            <div class="relative flex items-center">
+              <textarea
+                v-model="newMessage"
+                @keydown="handleKeyDown"
+                @keydown.shift.enter.prevent="startNewChat"
+                rows="1"
+                class="block w-full pl-4 pr-20 py-3 text-gray-900 rounded-full border-gray-200 shadow-sm focus:border-primary focus:ring-primary resize-none"
+                placeholder="Type your message..."
+                style="min-height: 44px; max-height: 120px;"
+              ></textarea>
+              <div class="absolute right-3 text-xs text-gray-400 pointer-events-none select-none">
+                Press Enter to send
+                <br />
+                Shift + Enter for new chat
+              </div>
             </div>
           </div>
-        </div>
-        <div class="flex-shrink-0 flex space-x-2">
-          <!-- 停止按钮 -->
-          <button
-            v-if="isLoading || isTyping"
-            @click="stopResponse"
-            class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
-              <rect x="6" y="6" width="8" height="8" />
-            </svg>
-          </button>
-          
-          <!-- 发送按钮 -->
+          <!-- 只保留发送按钮 -->
           <button
             v-if="!isLoading && !isTyping"
             @click="() => sendMessage()"
@@ -134,7 +157,7 @@ const messages = ref<Message[]>([])
 const newMessage = ref('')
 const isLoading = ref(false)
 const chatContainer = ref<HTMLElement | null>(null)
-const welcomeMessage = "👋 Hi! 欢迎来到 Skyline AI！我是 JJ，你的数字销售助手。我在这是为了让你的销售之旅更加顺畅。你是想听听我能做什么，还是直接开始流程呢？"
+const welcomeMessage = "👋 Hi! 欢迎来到 Skyline AI！我是 JJ，你的数字销售助手。我在这是为了让你销售之旅更加顺畅。你是想听我做什么，还是直接开始流程呢？"
 const isTyping = ref(false)
 const typingSpeed = 50
 const displayContents = ref<{ [key: number]: string }>({})
@@ -177,7 +200,7 @@ const handleStreamResponse = async (response: Response, aiMessageId: number) => 
             const parsedData = JSON.parse(data)
             //console.log('Parsed data:', parsedData)
             
-            // 处理不同类型的事件
+            // 处理不同类��的事件
             if (parsedData.event === 'conversation.message.delta') {
               if (parsedData.data?.content) {
                 // 解析实际的内容
@@ -192,34 +215,36 @@ const handleStreamResponse = async (response: Response, aiMessageId: number) => 
                           const parseOutput = JSON.parse(eventData.content)
                           const output = parseOutput.output
                           
-                          if (!processedContents.has(output)) {
-                            processedContents.add(output)
-                            
-                            const msgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
-                            if (msgIndex !== -1) {
-                              messages.value[msgIndex].content += output
+                          if (output !== undefined && output !== 'undefined') {
+                            if (!processedContents.has(output)) {
+                              processedContents.add(output)
                               
-                              // 实现打字机效果
-                              isTyping.value = true
-                              if (!displayContents.value[aiMessageId]) {
-                                displayContents.value[aiMessageId] = ''
-                              }
-                              
-                              let currentIndex = displayContents.value[aiMessageId].length
-                              while (currentIndex < messages.value[msgIndex].content.length) {
-                                displayContents.value[aiMessageId] = messages.value[msgIndex].content.slice(0, currentIndex + 1)
-                                await new Promise(resolve => setTimeout(resolve, typingSpeed))
-                                currentIndex++
+                              const msgIndex = messages.value.findIndex(msg => msg.id === aiMessageId)
+                              if (msgIndex !== -1) {
+                                messages.value[msgIndex].content += output
                                 
-                                // 使用新的滚动函数
-                                if (currentIndex % 3 === 0) { // 每3个字符滚动一次，避免过于频繁
-                                  await scrollToMessage(aiMessageId)
+                                // 实现打字机效果
+                                isTyping.value = true
+                                if (!displayContents.value[aiMessageId]) {
+                                  displayContents.value[aiMessageId] = ''
                                 }
+                                
+                                let currentIndex = displayContents.value[aiMessageId].length
+                                while (currentIndex < messages.value[msgIndex].content.length) {
+                                  displayContents.value[aiMessageId] = messages.value[msgIndex].content.slice(0, currentIndex + 1)
+                                  await new Promise(resolve => setTimeout(resolve, typingSpeed))
+                                  currentIndex++
+                                  
+                                  // 使用新的滚动函数
+                                  if (currentIndex % 3 === 0) { // 每3个字符滚动一次，避免过于频繁
+                                    await scrollToMessage(aiMessageId)
+                                  }
+                                }
+                                
+                                // 完成后滚动到底
+                                isTyping.value = false
+                                await scrollToBottom()
                               }
-                              
-                              // 完成后滚动到底部
-                              isTyping.value = false
-                              await scrollToBottom()
                             }
                           }
                         }
@@ -374,9 +399,9 @@ onMounted(() => {
 
 // 修改处理键盘事件
 const handleKeyDown = async (e: KeyboardEvent) => {
-  // 检查是否���在使用输入法
+  // 检查是否使用输入法
   if (e.isComposing || e.keyCode === 229) {
-    return  // 如果是输入法正在输入，直接返回
+    return  // 如果输入法正在输入，直接返回
   }
 
   // 只处理单独的回车键，不处理shift+enter
@@ -427,7 +452,7 @@ const stopResponse = () => {
   }
 }
 
-// 添加持久化相关的函数
+// 加持久化的函数
 const STORAGE_KEY = 'chat_history'
 
 // 保存消息到 localStorage
@@ -497,5 +522,16 @@ textarea {
 /* 隐藏 textarea 的 resize 手柄 */
 textarea::-webkit-resizer {
   display: none;
+}
+
+/* 添加动画样式 */
+@keyframes pulse {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+.animate-pulse {
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  @apply inline-block mx-0.5;
 }
 </style> 

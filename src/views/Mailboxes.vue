@@ -23,46 +23,6 @@
       </button>
     </div>
 
-    <!-- Gmail 连接选项 -->
-    <div class="mb-6 bg-white rounded-lg shadow p-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h3 class="text-lg font-medium text-gray-900">Gmail Integration</h3>
-          <p class="text-sm text-gray-500">Connect your Gmail account to manage emails</p>
-        </div>
-        <button
-          @click="connectGmail"
-          :disabled="!mailboxStore.canAddMore"
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <PlusIcon class="h-5 w-5 mr-2" />
-          Connect Gmail
-        </button>
-      </div>
-      
-      <!-- Gmail 连接状态 -->
-      <div v-if="connectedGmailAccounts.length > 0" class="mt-4 space-y-3">
-        <div v-for="account in connectedGmailAccounts" :key="account.email" 
-             class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-          <div class="flex items-center space-x-3">
-            <div class="flex-shrink-0">
-              <EnvelopeIcon class="h-6 w-6 text-gray-400" />
-            </div>
-            <div>
-              <p class="text-sm font-medium text-gray-900">{{ account.email }}</p>
-              <p class="text-xs text-gray-500">Gmail Account</p>
-            </div>
-          </div>
-          <button
-            @click="() => confirmDisconnect(account)"
-            class="text-sm text-red-600 hover:text-red-700"
-          >
-            Disconnect
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- 邮箱列表 -->
     <div class="mt-8 bg-white rounded-lg shadow overflow-hidden">
       <div v-if="mailboxStore.loading" class="p-8 text-center text-gray-500">
@@ -288,6 +248,8 @@
                 <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
                   Add Email Address
                 </DialogTitle>
+                
+                <!-- Gmail 快速连接按钮 -->
                 <div class="mt-4">
                   <button
                     @click="connectGmail"
@@ -297,6 +259,103 @@
                     <span class="text-sm font-medium">Connect with Google</span>
                   </button>
                 </div>
+
+                <div class="mt-4 relative">
+                  <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div class="relative flex justify-center text-sm">
+                    <span class="bg-white px-2 text-gray-500">Or add manually</span>
+                  </div>
+                </div>
+
+                <!-- 手动添加邮箱表单 -->
+                <form @submit.prevent="addManualMailbox" class="mt-4 space-y-4">
+                  <!-- 邮箱地址 -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">电子邮件地址</label>
+                    <input
+                      v-model="manualMailbox.email"
+                      type="email"
+                      @input="detectMailboxSettings"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                      required
+                    />
+                  </div>
+
+                  <!-- 用户名 -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">用户名</label>
+                    <input
+                      v-model="manualMailbox.username"
+                      type="text"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                      required
+                    />
+                  </div>
+
+                  <!-- 密码 -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">密码</label>
+                    <input
+                      v-model="manualMailbox.password"
+                      type="password"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                      required
+                    />
+                  </div>
+
+                  <!-- 账户类型 -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">账户类型</label>
+                    <select
+                      v-model="manualMailbox.type"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                    >
+                      <option value="POP">POP</option>
+                      <option value="IMAP">IMAP</option>
+                    </select>
+                  </div>
+
+                  <!-- 收件服务器 -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">收件服务器</label>
+                    <input
+                      v-model="manualMailbox.incomingServer"
+                      type="text"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                      required
+                    />
+                  </div>
+
+                  <!-- 发件服务器 -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">发件服务器</label>
+                    <input
+                      v-model="manualMailbox.outgoingServer"
+                      type="text"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                      required
+                    />
+                  </div>
+
+                  <!-- 按钮组 -->
+                  <div class="mt-6 flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                      @click="showAddMailboxModal = false"
+                    >
+                      取消
+                    </button>
+                    <button
+                      type="submit"
+                      class="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700"
+                    >
+                      登录
+                    </button>
+                  </div>
+                </form>
               </DialogPanel>
             </TransitionChild>
           </div>
@@ -386,6 +445,7 @@ import {
 import { useMailboxStore } from '@/stores/mailbox'
 import { type Mailbox } from '@/data/mailboxData'
 import { mailboxService } from '@/services/mailbox'
+import { GOOGLE_CONFIG } from '@/config/google'
 import CircleProgress from '@/components/CircleProgress.vue'
 import MailboxStatusTooltip from '@/components/MailboxStatusTooltip.vue'
 
@@ -395,6 +455,26 @@ const mailboxToDisconnect = ref<Mailbox | null>(null)
 const hoveredMailbox = ref<string | null>(null)
 const tooltipTriggerRef = ref<HTMLElement | undefined>(undefined)
 
+// 在 script setup 顶部添加类型定义
+interface ManualMailbox {
+  email: string;
+  username: string;
+  password: string;
+  type: 'POP' | 'IMAP';
+  incomingServer: string;
+  outgoingServer: string;
+}
+
+// 添加响应式变量
+const manualMailbox = ref<ManualMailbox>({
+  email: '',
+  username: '',
+  password: '',
+  type: 'POP',
+  incomingServer: '',
+  outgoingServer: ''
+})
+
 // 获取已连接的 Gmail 账户
 const connectedGmailAccounts = computed(() => 
   mailboxStore.mailboxes.filter(m => m.provider === 'gmail')
@@ -402,20 +482,19 @@ const connectedGmailAccounts = computed(() =>
 
 // 连接 Gmail
 const connectGmail = async () => {
+  console.log('Connect Gmail button clicked')
   try {
-    // 检查是否可以添加更多邮箱
     if (!mailboxStore.canAddMore) {
       console.warn('Maximum mailbox limit reached')
       return
     }
 
-    // 使用环境变量中的配置获取授权 URL
+    console.log('Getting auth URL...')
     const authUrl = mailboxService.getGmailAuthUrl()
-    
-    // 记录当前状态（可选）
+    console.log('Generated auth URL:', authUrl)
+
     localStorage.setItem('gmail_auth_pending', 'true')
-    
-    // 重定向到 Google 授权页面
+    console.log('Redirecting to auth URL...')
     window.location.href = authUrl
   } catch (error) {
     console.error('Failed to connect Gmail:', error)
@@ -431,7 +510,7 @@ const disconnectGmail = async (account: any) => {
     // 清除相关的本地存储
     localStorage.removeItem(`gmail_token_${account.email}`)
     
-    // 可选：通知后端清除令牌
+    // 可选：通知��端清除令牌
     await fetch(`${import.meta.env.VITE_API_URL}/api/gmail/disconnect`, {
       method: 'POST',
       headers: {
@@ -497,6 +576,78 @@ const hideTooltip = () => {
   tooltipTriggerRef.value = undefined
 }
 
+// 自动检测邮箱设置
+const detectMailboxSettings = () => {
+  const email = manualMailbox.value.email
+  const domain = email.split('@')[1]
+  
+  if (!domain) return
+  
+  // 常见邮箱服务商配置
+  const configs: Record<string, Partial<ManualMailbox>> = {
+    'gmail.com': {
+      type: 'POP',
+      incomingServer: 'pop.gmail.com',
+      outgoingServer: 'smtp.gmail.com'
+    },
+    'outlook.com': {
+      type: 'POP',
+      incomingServer: 'pop3.live.com',
+      outgoingServer: 'smtp.live.com'
+    }
+  }
+
+  // 设置默认用户名
+  manualMailbox.value.username = email
+
+  // 应用预设配置
+  const config = configs[domain]
+  if (config) {
+    Object.assign(manualMailbox.value, config)
+  }
+}
+
+// 添加手动配置的邮箱
+const addManualMailbox = async () => {
+  try {
+    // 验证邮箱连接
+    const result = await mailboxService.verifyManualMailbox(manualMailbox.value)
+    if (result.success) {
+      await mailboxStore.addMailbox({
+        email: manualMailbox.value.email,
+        provider: 'other',
+        capacity: 100,
+        enabled: true,
+        status: 'Healthy',
+        health: 100,
+        statusChecks: {
+          spf: true,
+          dmarc: true,
+          dkim: true,
+          rdns: true,
+          aRecord: true,
+          mxRecord: true
+        }
+      })
+
+      // 清空表单内容
+      manualMailbox.value = {
+        email: '',
+        username: '',
+        password: '',
+        type: 'POP',
+        incomingServer: '',
+        outgoingServer: ''
+      }
+
+      // 关闭弹窗
+      showAddMailboxModal.value = false
+    }
+  } catch (error) {
+    console.error('Failed to add mailbox:', error)
+  }
+}
+
 // 初始化
 onMounted(() => {
   // 检查是否有待处理的 Gmail 授权
@@ -507,6 +658,13 @@ onMounted(() => {
   }
   
   mailboxStore.loadMailboxes()
+
+  // 检查环境变量和配置
+  console.log('Mailboxes mounted, checking config:', {
+    clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+    redirectUri: import.meta.env.VITE_APP_URL,
+    googleConfig: GOOGLE_CONFIG
+  })
 })
 </script>
 

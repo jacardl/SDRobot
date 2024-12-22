@@ -41,6 +41,15 @@ export interface GmailMailbox extends Mailbox {
   refreshToken: string;
 }
 
+export interface ManualMailbox {
+  email: string;
+  username: string;
+  password: string;
+  type: 'POP' | 'IMAP';
+  incomingServer: string;
+  outgoingServer: string;
+}
+
 const mailboxes: Mailbox[] = [
   {
     email: 'jaspar@Skyline.com',
@@ -107,8 +116,6 @@ interface GmailAuthResponse {
 }
 
 export class MailboxService {
-  private readonly CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
-  private readonly REDIRECT_URI = import.meta.env.VITE_GOOGLE_REDIRECT_URI
   private accessToken: string | null = null
   private email: string | null = null
 
@@ -117,27 +124,14 @@ export class MailboxService {
     this.email = localStorage.getItem('gmail_email')
   }
 
-  // 获取 Gmail 授权 URL
-  getAuthUrl(): string {
-    const params = new URLSearchParams({
-      client_id: this.CLIENT_ID,
-      redirect_uri: this.REDIRECT_URI,
-      response_type: 'code',
-      scope: [
-        'https://www.googleapis.com/auth/gmail.readonly',
-        'https://www.googleapis.com/auth/gmail.modify',
-        'https://www.googleapis.com/auth/userinfo.profile',
-        'https://www.googleapis.com/auth/userinfo.email'
-      ].join(' '),
-      access_type: 'offline',
-      prompt: 'consent'
-    })
-
-    return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
-  }
-
   // 获取 Gmail 授权链接
   getGmailAuthUrl(): string {
+    // 检查配置
+    if (!GOOGLE_CONFIG.clientId) {
+      console.error('Missing Google client ID:', GOOGLE_CONFIG)
+      throw new Error('Google client ID is not configured')
+    }
+
     // 生成并保存状态
     const state = crypto.randomUUID()
     localStorage.setItem('gmail_auth_state', state)
@@ -150,10 +144,20 @@ export class MailboxService {
       access_type: 'offline',
       prompt: 'consent',
       include_granted_scopes: 'true',
-      state,
+      state
     })
 
-    return `${GOOGLE_CONFIG.authUrl}?${params.toString()}`
+    // 添加调试日志
+    console.log('Gmail auth config:', {
+      clientId: GOOGLE_CONFIG.clientId,
+      redirectUri: GOOGLE_CONFIG.redirectUri,
+      scopes: GOOGLE_CONFIG.scopes
+    })
+
+    const authUrl = `${GOOGLE_CONFIG.authUrl}?${params.toString()}`
+    console.log('Generated auth URL:', authUrl)
+
+    return authUrl
   }
 
   // 处理 Gmail 授权回调
@@ -412,6 +416,61 @@ export class MailboxService {
 
     if (!response.ok) throw new Error('Failed to refresh token')
     return response.json()
+  }
+
+  // 添加到 MailboxService 类中
+  async verifyManualMailbox(mailbox: ManualMailbox): Promise<{ success: boolean }> {
+    try {
+      // 这里添加实际的邮箱验证逻辑
+      // 暂时返回成功
+      return { success: true }
+    } catch (error) {
+      console.error('Failed to verify mailbox:', error)
+      return { success: false }
+    }
+  }
+
+  // 从数据库加载邮箱列表
+  async loadMailboxesFromDB() {
+    try {
+      // 临时：从 localStorage 加载数据
+      const savedMailboxes = localStorage.getItem('mailboxes')
+      if (savedMailboxes) {
+        return JSON.parse(savedMailboxes)
+      }
+      // 如果没有保存的数据，返回默认邮箱列表
+      return mailboxes
+    } catch (error) {
+      console.error('Failed to load mailboxes:', error)
+      return mailboxes // 返回默认邮箱列表
+    }
+  }
+
+  // 保存邮箱到数据库
+  async saveMailbox(mailbox: Mailbox | GmailMailbox) {
+    try {
+      // 临时：保存到 localStorage
+      const currentMailboxes = await this.loadMailboxesFromDB()
+      currentMailboxes.push(mailbox)
+      localStorage.setItem('mailboxes', JSON.stringify(currentMailboxes))
+      return mailbox
+    } catch (error) {
+      console.error('Failed to save mailbox:', error)
+      throw error
+    }
+  }
+
+  // 从数据库删除邮箱
+  async deleteMailbox(email: string) {
+    try {
+      // 临时：从 localStorage 删除
+      const currentMailboxes = await this.loadMailboxesFromDB()
+      const updatedMailboxes = currentMailboxes.filter((m: Mailbox) => m.email !== email)
+      localStorage.setItem('mailboxes', JSON.stringify(updatedMailboxes))
+    } catch (error) {
+      console.error('Failed to delete mailbox:', error)
+      throw error
+    }
   }
 }
 

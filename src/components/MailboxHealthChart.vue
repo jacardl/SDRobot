@@ -1,21 +1,11 @@
 <!-- 邮箱健康度环形图 -->
 <template>
   <div class="relative w-full aspect-square">
-    <!-- 中心文本 -->
-    <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-      <div class="text-4xl font-semibold text-gray-900">
-        {{ displayedHealth }}%
-      </div>
-      <div class="text-sm text-gray-500">
-        {{ hoveredIndex !== null ? sortedMailboxes[hoveredIndex].email : t('dashboard.healthScore') }}
-      </div>
-    </div>
-    
-    <!-- SVG 环形图 -->
-    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+    <!-- SVG 环形图 - 添加 pointer-events-none -->
+    <svg class="w-full h-full transform -rotate-90 absolute inset-0" viewBox="0 0 100 100">
       <g>
         <template v-for="(mailbox, index) in sortedMailboxes" :key="mailbox.email">
-          <!-- 计算每个环的位置和大小 -->
+          <!-- 计算每个环的位置和大小 - 添加 pointer-events-auto -->
           <circle
             :cx="50"
             :cy="50"
@@ -23,7 +13,7 @@
             :stroke-width="4"
             :stroke-dasharray="`${(mailbox.health / 100) * (2 * Math.PI * (44 - index * 5))} ${2 * Math.PI * (44 - index * 5)}`"
             fill="none"
-            class="transition-all duration-300"
+            class="transition-all duration-300 pointer-events-auto"
             :class="[
               'stroke-primary',
               { 'opacity-40': hoveredIndex !== null && hoveredIndex !== index }
@@ -35,6 +25,16 @@
         </template>
       </g>
     </svg>
+
+    <!-- 中心文本 - 添加 pointer-events-none -->
+    <div class="absolute inset-0 flex flex-col items-center justify-center text-center z-10 pointer-events-none">
+      <div class="text-4xl font-semibold text-gray-900">
+        {{ displayedHealth }}%
+      </div>
+      <div class="text-sm text-gray-500">
+        {{ hoveredIndex !== null ? sortedMailboxes[hoveredIndex].email : t('dashboard.healthScore') }}
+      </div>
+    </div>
   </div>
 </template>
 

@@ -38,19 +38,8 @@ export const useMailboxStore = defineStore('mailbox', () => {
     loading.value = true
     error.value = null
     try {
-      // 检查是否已认证
-      if (mailboxService.isAuthenticated()) {
-        const email = mailboxService.getCurrentEmail()
-        if (email && !mailboxes.value.find(m => m.email === email)) {
-          // 添加新认证的邮箱
-          mailboxes.value.push(createDefaultMailbox(email))
-        }
-      }
-
-      // 如果没有数据，加载默认数据
-      if (mailboxes.value.length === 0) {
-        mailboxes.value = [...defaultMailboxes]
-      }
+      const dbMailboxes = await mailboxService.loadMailboxesFromDB()
+      mailboxes.value = dbMailboxes
     } catch (e) {
       error.value = 'Failed to load mailboxes. Please try again.'
     } finally {
@@ -59,19 +48,31 @@ export const useMailboxStore = defineStore('mailbox', () => {
   }
 
   // 添加邮箱
-  const addMailbox = (mailbox: Mailbox | GmailMailbox) => {
-    mailboxes.value.push(mailbox)
+  const addMailbox = async (mailbox: Mailbox | GmailMailbox) => {
+    try {
+      // 保存到数据库
+      await mailboxService.saveMailbox(mailbox)
+      // 添加到本地状态
+      mailboxes.value.push(mailbox)
+    } catch (error) {
+      console.error('Failed to add mailbox:', error)
+      throw error
+    }
   }
 
   // 移除邮箱
-  const removeMailbox = (email: string) => {
-    const index = mailboxes.value.findIndex(m => m.email === email)
-    if (index > -1) {
-      mailboxes.value.splice(index, 1)
-      // 同时断开邮箱连接
-      if (mailboxService.getCurrentEmail() === email) {
-        mailboxService.disconnect()
+  const removeMailbox = async (email: string) => {
+    try {
+      // 从数据库删除
+      await mailboxService.deleteMailbox(email)
+      // 从本地状态移除
+      const index = mailboxes.value.findIndex(m => m.email === email)
+      if (index > -1) {
+        mailboxes.value.splice(index, 1)
       }
+    } catch (error) {
+      console.error('Failed to remove mailbox:', error)
+      throw error
     }
   }
 

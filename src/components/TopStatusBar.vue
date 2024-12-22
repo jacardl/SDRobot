@@ -196,11 +196,13 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import CircularProgress from './CircularProgress.vue'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const { t, locale } = useI18n()
 
 const showHelp = () => {
@@ -221,7 +223,8 @@ const showSettings = () => {
 }
 
 const logout = () => {
-  console.log('Logout')
+  authStore.logout()
+  router.push('/auth/login')
 }
 </script>
 

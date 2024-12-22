@@ -40,50 +40,74 @@ export interface DBLead {
 export class DatabaseService {
   private db: IDBDatabase | null = null;
   private initialized = false;
+  private readonly DB_NAME = 'skyline_db';
+  private readonly DB_VERSION = 1;  // 重置版本号为 1
   
   async init() {
     if (this.initialized) return;
     
     return new Promise<void>((resolve, reject) => {
-      const request = indexedDB.open('skyline_db', 2);  // 版本升级到 2
+      console.log('Initializing database...');
+      const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
       
-      request.onerror = () => reject(request.error);
+      request.onerror = () => {
+        console.error('Database error:', request.error);
+        reject(request.error);
+      };
       
       request.onsuccess = () => {
+        console.log('Database opened successfully');
         this.db = request.result;
         this.initialized = true;
         resolve();
       };
       
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
+        console.log('Database upgrade needed');
         const db = (event.target as IDBOpenDBRequest).result;
-        
-        // 用户表
+
+        // 创建用户表
         if (!db.objectStoreNames.contains('users')) {
+          console.log('Creating users store');
           const userStore = db.createObjectStore('users', { keyPath: 'id' });
           userStore.createIndex('email', 'email', { unique: true });
         }
 
-        // 邮箱表
+        // 创建邮箱表
         if (!db.objectStoreNames.contains('mailboxes')) {
+          console.log('Creating mailboxes store');
           const mailboxStore = db.createObjectStore('mailboxes', { keyPath: 'id' });
           mailboxStore.createIndex('userId', 'userId', { unique: false });
-          mailboxStore.createIndex('email', 'email', { unique: true });
+          mailboxStore.createIndex('email', 'email', { unique: false });
         }
 
-        // 线索表
+        // 创建线索表
         if (!db.objectStoreNames.contains('leads')) {
+          console.log('Creating leads store');
           const leadStore = db.createObjectStore('leads', { keyPath: 'id' });
           leadStore.createIndex('userId', 'userId', { unique: false });
-          leadStore.createIndex('email', 'email', { unique: true });
+          leadStore.createIndex('email', 'email', { unique: false });
         }
       };
     });
   }
 
+  // 在使用数据库前检查表是否存在
+  private checkStore(storeName: string): boolean {
+    if (!this.db) return false;
+    return this.db.objectStoreNames.contains(storeName);
+  }
+
+  // 修改 ensureInitialized 方法
   private async ensureInitialized() {
-    if (!this.initialized) {
+    if (!this.initialized || !this.db) {
       await this.init();
+    }
+    // 验证所需的表是否都存在
+    const requiredStores = ['users', 'mailboxes', 'leads'];
+    const missingStores = requiredStores.filter(store => !this.checkStore(store));
+    if (missingStores.length > 0) {
+      throw new Error(`Missing required stores: ${missingStores.join(', ')}`);
     }
   }
 

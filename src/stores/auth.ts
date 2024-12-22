@@ -15,8 +15,9 @@ const generateUUID = (): string => {
 
 export const useAuthStore = defineStore('auth', () => {
   const db = new DatabaseService()
-  const user = ref<User | null>(null)
-  const token = ref<string | null>(null)
+  // 从 localStorage 初始化状态
+  const user = ref<User | null>(JSON.parse(localStorage.getItem('user') || 'null'))
+  const token = ref<string | null>(localStorage.getItem('token'))
   
   const isAuthenticated = computed(() => !!token.value)
 
@@ -56,10 +57,13 @@ export const useAuthStore = defineStore('auth', () => {
         lastLoginAt: existingUser.lastLoginAt
       };
       
+      // 保存到 store 和 localStorage
       user.value = userData;
       token.value = 'session_token';
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('token', token.value);
+      
       console.log('Login successful');
-
       return userData;
     } catch (error) {
       console.error('Login failed:', error);
@@ -104,6 +108,9 @@ export const useAuthStore = defineStore('auth', () => {
   const logout = () => {
     user.value = null
     token.value = null
+    // 清除 localStorage
+    localStorage.removeItem('user')
+    localStorage.removeItem('token')
   }
 
   // 检查认证状态

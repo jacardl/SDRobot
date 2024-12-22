@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed, onMounted } from 'vue'
 import type { User, LoginCredentials, SignupCredentials } from '@/types/auth'
 import { DatabaseService, type DBUser } from '../services/database'
-import { hashPassword } from '../utils/crypto'
+import { hashPassword, verifyPassword } from '../utils/crypto'
 
 // 添加一个生成 UUID 的函数
 const generateUUID = (): string => {
@@ -23,34 +23,47 @@ export const useAuthStore = defineStore('auth', () => {
   // 登录
   const login = async (credentials: LoginCredentials) => {
     try {
-      const existingUser = await db.findUserByEmail(credentials.email)
+      console.log('Login attempt:', credentials.email);
+      const existingUser = await db.findUserByEmail(credentials.email);
+      
       if (!existingUser) {
-        throw new Error('User not found')
+        console.log('User not found');
+        throw new Error('Invalid email or password');
       }
       
-      // 验证密码
-      const hashedPassword = await hashPassword(credentials.password)
-      if (hashedPassword !== existingUser.password) {
-        throw new Error('Invalid password')
+      console.log('Found user:', existingUser);
+      console.log('Stored hash:', existingUser.password);
+      
+      // 生成输入密码的哈希
+      const inputHash = await hashPassword(credentials.password);
+      console.log('Input hash:', inputHash);
+      
+      // 比较哈希值
+      if (inputHash !== existingUser.password) {
+        console.log('Password mismatch');
+        throw new Error('Invalid email or password');
       }
 
       // 更新登录时间
-      existingUser.lastLoginAt = new Date()
+      existingUser.lastLoginAt = new Date();
       
-      // 只在内存中保存用户状态
-      user.value = {
+      // 创建用户会话数据
+      const userData: User = {
         id: existingUser.id,
         email: existingUser.email,
         name: existingUser.name,
         createdAt: existingUser.createdAt,
         lastLoginAt: existingUser.lastLoginAt
-      }
-      token.value = 'session_token'
+      };
+      
+      user.value = userData;
+      token.value = 'session_token';
+      console.log('Login successful');
 
-      return user.value
+      return userData;
     } catch (error) {
-      console.error('Login failed:', error)
-      throw error
+      console.error('Login failed:', error);
+      throw error;
     }
   }
 

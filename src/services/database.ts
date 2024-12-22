@@ -1,3 +1,7 @@
+import { leads } from '@/data/leadsData'
+import { defaultMailboxes } from '@/data/mailboxData'
+import { hashPassword } from '@/utils/crypto'
+
 export interface DBUser {
   id: string;
   email: string;
@@ -18,6 +22,14 @@ export interface DBMailbox {
   enabled: boolean;
   status: 'Healthy' | 'Warning' | 'Urgent Issues';
   health: number;
+  statusChecks: {
+    spf: boolean;
+    dkim: boolean;
+    dmarc: boolean;
+    rdns: boolean;
+    aRecord: boolean;
+    mxRecord: boolean;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -55,10 +67,18 @@ export class DatabaseService {
         reject(request.error);
       };
       
-      request.onsuccess = () => {
+      request.onsuccess = async () => {
         console.log('Database opened successfully');
         this.db = request.result;
         this.initialized = true;
+        
+        // 初始化默认账号
+        try {
+          await this.initializeDefaultAccounts();
+        } catch (error) {
+          console.error('Failed to initialize default account:', error);
+        }
+        
         resolve();
       };
       
@@ -172,14 +192,24 @@ export class DatabaseService {
   }
 
   async findUserByEmail(email: string): Promise<DBUser | null> {
+    console.log('Finding user by email:', email);
     await this.ensureInitialized();
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction('users', 'readonly');
       const store = transaction.objectStore('users');
       const index = store.index('email');
       const request = index.get(email);
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error);
+      
+      request.onsuccess = () => {
+        const user = request.result;
+        console.log('Found user:', user);
+        resolve(user || null);
+      };
+      
+      request.onerror = () => {
+        console.error('Error finding user:', request.error);
+        reject(request.error);
+      };
     });
   }
 
@@ -239,6 +269,87 @@ export class DatabaseService {
       request.onsuccess = () => resolve(request.result || null);
       request.onerror = () => reject(request.error);
     });
+  }
+
+  // 初始化默认账号
+  async initializeDefaultAccounts() {
+    console.log('Initializing default accounts...');
+    try {
+      await this.ensureInitialized();
+      
+      // 检查默认账号是否已存在
+      const defaultEmail = 'admin@skyline.com';
+      console.log('Checking if default account exists:', defaultEmail);
+      const existingUser = await this.findUserByEmail(defaultEmail);
+      
+      if (!existingUser) {
+        console.log('Creating default admin account...');
+        // 创建默认管理员账号
+        const password = 'admin123';
+        const hashedPassword = await hashPassword(password);
+        console.log('Creating admin with hash:', hashedPassword);
+        
+        const adminUser: DBUser = {
+          id: crypto.randomUUID(),
+          email: defaultEmail,
+          password: hashedPassword,
+          name: 'Admin',
+          createdAt: new Date(),
+          lastLoginAt: new Date()
+        };
+        
+        await this.addUser(adminUser);
+        console.log('Default admin account created successfully:', adminUser);
+
+        // 导入默认邮箱数据
+        console.log('Importing default mailboxes...');
+        for (const mailbox of defaultMailboxes) {
+          const dbMailbox: DBMailbox = {
+            id: crypto.randomUUID(),
+            userId: adminUser.id,
+            email: mailbox.email,
+            provider: mailbox.provider || 'other',
+            capacity: mailbox.capacity,
+            enabled: mailbox.enabled,
+            status: mailbox.status,
+            health: mailbox.health,
+            statusChecks: mailbox.statusChecks,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+          await this.addMailbox(dbMailbox);
+        }
+        console.log('Default mailboxes imported');
+
+        // 导入默认线索数据
+        console.log('Importing default leads...');
+        for (const lead of leads) {
+          const dbLead: DBLead = {
+            id: crypto.randomUUID(),
+            userId: adminUser.id,
+            name: lead.name,
+            email: lead.email,
+            company: lead.company,
+            position: lead.position,
+            status: lead.stage,
+            source: 'Default Import',
+            lastContact: lead.lastContact,
+            notes: lead.notes?.[0]?.content,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+          await this.addLead(dbLead);
+        }
+        console.log('Default leads imported');
+        
+        console.log('Default data import completed');
+      } else {
+        console.log('Default admin account already exists:', existingUser);
+      }
+    } catch (error) {
+      console.error('Failed to initialize default account:', error);
+      throw error;
+    }
   }
 
   // ... 其他现有方法保持不变 ...

@@ -102,40 +102,32 @@
 
     <!-- 输入区域 -->
     <div class="border-t border-gray-200 bg-white p-4">
-      <div class="max-w-4xl mx-auto">
-        <!-- 输入框和发送按钮 -->
-        <div class="flex items-center space-x-4">
-          <div class="flex-1 relative">
-            <div class="relative flex items-center">
-              <textarea
-                v-model="newMessage"
-                @keydown="handleKeyDown"
-                @keydown.shift.enter.prevent="startNewChat"
-                rows="1"
-                class="block w-full pl-4 pr-20 py-3 text-gray-900 rounded-full border-gray-200 shadow-sm focus:border-primary focus:ring-primary resize-none"
-                placeholder="Type your message..."
-                style="min-height: 44px; max-height: 120px;"
-              ></textarea>
-              <div class="absolute right-3 text-xs text-gray-400 pointer-events-none select-none">
-                Press Enter to send
-                <br />
-                Shift + Enter for new chat
-              </div>
-            </div>
-          </div>
-          <!-- 只保留发送按钮 -->
-          <button
-            v-if="!isLoading && !isTyping"
-            @click="() => sendMessage()"
-            :disabled="!newMessage.trim()"
-            class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white transform rotate-90" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+      <form @submit.prevent="(e: Event) => sendMessage()" class="flex space-x-4">
+        <textarea
+          ref="messageInput"
+          v-model="newMessage"
+          :placeholder="t('chat.placeholder')"
+          rows="1"
+          class="flex-1 min-h-[44px] max-h-[120px] resize-none rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent p-2"
+          @keydown="handleKeyDown"
+        />
+        <button
+          type="submit"
+          :disabled="isLoading || !newMessage.trim()"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+        >
+          <template v-if="isLoading">
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
-          </button>
-        </div>
-      </div>
+            {{ t('chat.typing') }}
+          </template>
+          <template v-else>
+            {{ t('chat.send') }}
+          </template>
+        </button>
+      </form>
     </div>
   </div>
 </template>
@@ -143,6 +135,7 @@
 <script setup lang="ts">
 import { constructFromSymbol } from 'date-fns/constants';
 import { ref, onMounted, nextTick, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 interface Message {
   id: number
@@ -166,6 +159,7 @@ const welcomeMessage = "👋 Hi! 欢迎来到 SDRobot AI！我是 JJ，你的数
 const isTyping = ref(false)
 const typingSpeed = 50
 const displayContents = ref<{ [key: number]: string }>({})
+const { t } = useI18n()
 
 // 格式化时间
 const formatTime = (date: Date) => {
@@ -208,7 +202,7 @@ const handleStreamResponse = async (response: Response, aiMessageId: number) => 
             // 处理不同类型的事件
             if (parsedData.event === 'conversation.message.delta') {
               if (parsedData.data?.content) {
-                // 解析实际的内容
+                // 解析际的内容
                 const content = parsedData.data.content
                 if (content.includes('event:conversation.message.delta') && content.includes('data:')) {
                   const eventLines = content.split('\n')
@@ -354,7 +348,7 @@ const sendMessage = async (content?: string, retryCount = 0) => {
     messages.value.push({
       id: Date.now() + 2,
       type: 'ai',
-      content: '抱歉，遇到了网络问题。请检查网络连接后重试。',
+      content: t('chat.networkError'),
       timestamp: new Date()
     })
   } finally {
@@ -429,7 +423,7 @@ const startNewChat = () => {
   scrollToBottom()
 }
 
-// 添加新的滚动函数
+// 添加新的滚动函��
 const scrollToMessage = async (messageId: number) => {
   await nextTick()
   const messageElement = document.querySelector(`[data-message-id="${messageId}"]`)

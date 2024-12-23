@@ -2,8 +2,8 @@
   <div class="p-4 sm:p-6">
     <div class="max-w-7xl mx-auto">
       <div class="mb-6 sm:mb-8">
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Integrations</h1>
-        <p class="mt-1 text-sm text-gray-500">Import data to and export data from Artisan.</p>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">{{ t('integrations.title') }}</h1>
+        <p class="mt-1 text-sm text-gray-500">{{ t('integrations.description') }}</p>
       </div>
 
       <div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -50,7 +50,7 @@
                     <div class="px-4 sm:px-6">
                       <div class="flex items-start justify-between">
                         <DialogTitle class="text-base sm:text-lg font-medium text-gray-900">
-                          {{ selectedIntegration?.name }} Configuration
+                          {{ selectedIntegration?.name }} {{ t('integrations.configuration.title') }}
                         </DialogTitle>
                         <div class="ml-3 flex h-7 items-center">
                           <button
@@ -68,24 +68,24 @@
                       <!-- 配置内容 -->
                       <div v-if="selectedIntegration?.id === 'hubspot'" class="space-y-6">
                         <div>
-                          <label class="block text-sm font-medium text-gray-700">Sync Frequency</label>
+                          <label class="block text-sm font-medium text-gray-700">{{ t('integrations.configuration.syncFrequency') }}</label>
                           <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
-                            <option>Real-time</option>
-                            <option>Every hour</option>
-                            <option>Every day</option>
-                            <option>Every week</option>
+                            <option>{{ t('integrations.configuration.frequencies.realtime') }}</option>
+                            <option>{{ t('integrations.configuration.frequencies.hourly') }}</option>
+                            <option>{{ t('integrations.configuration.frequencies.daily') }}</option>
+                            <option>{{ t('integrations.configuration.frequencies.weekly') }}</option>
                           </select>
                         </div>
                         <div>
-                          <label class="block text-sm font-medium text-gray-700">Lead Status Mapping</label>
+                          <label class="block text-sm font-medium text-gray-700">{{ t('integrations.configuration.leadStatusMapping') }}</label>
                           <div class="mt-2 space-y-4">
-                            <div v-for="status in ['New Lead', 'Contacted', 'Qualified']" :key="status" class="flex items-center space-x-2">
-                              <span class="min-w-[80px] text-sm text-gray-500">{{ status }}</span>
+                            <div v-for="status in ['newLead', 'contacted', 'qualified']" :key="status" class="flex items-center space-x-2">
+                              <span class="min-w-[80px] text-sm text-gray-500">{{ t(`integrations.configuration.statuses.${status}`) }}</span>
                               <select class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
-                                <option>New</option>
-                                <option>Open</option>
-                                <option>In Progress</option>
-                                <option>Qualified</option>
+                                <option>{{ t('integrations.configuration.options.new') }}</option>
+                                <option>{{ t('integrations.configuration.options.open') }}</option>
+                                <option>{{ t('integrations.configuration.options.inProgress') }}</option>
+                                <option>{{ t('integrations.configuration.options.qualified') }}</option>
                               </select>
                             </div>
                           </div>
@@ -96,14 +96,14 @@
                             class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                             @click="showConfigDrawer = false"
                           >
-                            Cancel
+                            {{ t('integrations.actions.cancel') }}
                           </button>
                           <button
                             type="button"
                             class="inline-flex justify-center rounded-md border border-transparent bg-primary px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                             @click="saveConfig"
                           >
-                            Save
+                            {{ t('integrations.actions.save') }}
                           </button>
                         </div>
                       </div>
@@ -121,6 +121,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import IntegrationCard from '@/components/IntegrationCard.vue'

@@ -3,12 +3,12 @@
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <img class="mx-auto h-12 w-auto" src="@/assets/logo.svg" alt="Logo" />
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-        Sign in to your account
+        {{ t('auth.signIn') }}
       </h2>
       <p class="mt-2 text-center text-sm text-gray-600">
-        Or
+        {{ t('auth.or') }}
         <router-link to="/auth/signup" class="font-medium text-green-600 hover:text-green-500">
-          create a new account
+          {{ t('auth.createAccount') }}
         </router-link>
       </p>
     </div>
@@ -33,7 +33,7 @@
           <!-- 邮箱输入 -->
           <div>
             <label for="email" class="block text-sm font-medium text-gray-700">
-              Email address
+              {{ t('auth.emailAddress') }}
             </label>
             <div class="mt-1">
               <input
@@ -49,7 +49,7 @@
           <!-- 密码输入 -->
           <div>
             <label for="password" class="block text-sm font-medium text-gray-700">
-              Password
+              {{ t('auth.password') }}
             </label>
             <div class="mt-1">
               <input
@@ -74,10 +74,10 @@
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                Signing in...
+                {{ t('auth.signingIn') }}
               </template>
               <template v-else>
-                Sign in
+                {{ t('auth.signIn') }}
               </template>
             </button>
           </div>
@@ -93,9 +93,11 @@ import { useRouter } from 'vue-router'
 import { XCircleIcon } from '@heroicons/vue/24/solid'
 import { useAuthStore } from '@/stores/auth'
 import type { LoginCredentials } from '@/types/auth'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const loading = ref(false)
 const error = ref('')

@@ -10,7 +10,7 @@
           </span>
         </div>
         <p class="text-gray-500 mt-1">
-          Ava will dynamically rotate between your mailboxes, maximizing deliverability.
+          JJ will dynamically rotate between your mailboxes, maximizing deliverability.
         </p>
       </div>
       <button

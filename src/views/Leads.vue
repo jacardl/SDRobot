@@ -1,19 +1,19 @@
 <template>
   <div class="p-6">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Leads</h1>
+      <h1 class="text-2xl font-bold text-gray-900">{{ t('nav.leads') }}</h1>
       <div class="flex space-x-4">
         <div class="relative">
           <input
             type="text"
             v-model="searchQuery"
-            placeholder="Search by name, email or company..."
+            :placeholder="t('leads.search')"
             class="w-80 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
           />
           <MagnifyingGlassIcon class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
         </div>
         <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark">
-          Add Lead
+          {{ t('leads.actions.add') }}
         </button>
       </div>
     </div>
@@ -33,19 +33,19 @@
               />
             </div>
             <div class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Name
+              {{ t('leads.fields.name') }}
             </div>
             <div class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Workflow Stage
+              {{ t('leads.fields.stage') }}
             </div>
             <div class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Company
+              {{ t('leads.fields.company') }}
             </div>
             <div class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Engaged
+              {{ t('leads.fields.engaged') }}
             </div>
             <div class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Last Contact
+              {{ t('leads.fields.lastContact') }}
             </div>
           </div>
         </div>
@@ -80,7 +80,7 @@
                 class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full whitespace-nowrap"
                 :class="getStageClass(lead.stage)"
               >
-                {{ lead.stage }}
+                {{ t(`leads.status.${lead.stage.toLowerCase()}`) }}
               </span>
             </div>
             <div class="px-6 py-4 min-w-0">
@@ -94,7 +94,7 @@
                   :class="lead.active ? 'bg-green-500' : 'bg-gray-300'"
                 ></div>
                 <span class="text-sm text-gray-500">
-                  {{ lead.active ? 'Active' : 'Inactive' }}
+                  {{ lead.active ? t('leads.status.active') : t('leads.status.inactive') }}
                 </span>
               </div>
             </div>
@@ -109,7 +109,11 @@
     <!-- 分页 -->
     <div class="flex justify-between items-center mt-4">
       <div class="text-sm text-gray-700">
-        Showing <span class="font-medium">{{ startIndex + 1 }}</span> to <span class="font-medium">{{ endIndex }}</span> of <span class="font-medium">{{ filteredLeads.length }}</span> results
+        {{ t('leads.pagination.showing', { 
+          start: startIndex + 1,
+          end: endIndex,
+          total: filteredLeads.length
+        }) }}
       </div>
       <div class="flex space-x-1">
         <button 
@@ -117,7 +121,7 @@
           :disabled="currentPage === 1"
           @click="currentPage--"
         >
-          Previous
+          {{ t('leads.pagination.previous') }}
         </button>
         <button 
           v-for="(page, index) in paginationButtons" 
@@ -137,7 +141,7 @@
           :disabled="currentPage === totalPages"
           @click="currentPage++"
         >
-          Next
+          {{ t('leads.pagination.next') }}
         </button>
       </div>
     </div>
@@ -159,6 +163,11 @@
       :show="showDetailsPanel" 
       @close="closeLeadDetails"
     />
+
+    <!-- 无结果提示 -->
+    <div v-if="paginatedLeads.length === 0" class="text-center py-8 text-gray-500">
+      {{ t('leads.noResults') }}
+    </div>
   </div>
 </template>
 
@@ -175,6 +184,8 @@ import {
   getStageClass,
   enrichLeadData
 } from '@/data/leadsData'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 // 搜索和分页
 const searchQuery = ref('')

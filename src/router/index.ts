@@ -2,9 +2,37 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import MainLayout from '@/layouts/MainLayout.vue'
 import AuthLayout from '@/layouts/AuthLayout.vue'
-import SimpleLayout from '@/layouts/SimpleLayout.vue'
-import Leads from '@/views/Leads.vue'
-import LeadDetail from '@/views/LeadDetail.vue'
+
+// 预加载所有视图组件
+const viewModules = {
+  Dashboard: () => import(/* webpackChunkName: "dashboard" */ '../views/Dashboard.vue'),
+  Chat: () => import(/* webpackChunkName: "chat" */ '../views/Chat.vue'),
+  Leads: () => import(/* webpackChunkName: "leads" */ '../views/Leads.vue'),
+  LeadDetail: () => import(/* webpackChunkName: "lead-detail" */ '../views/LeadDetail.vue'),
+  Integrations: () => import(/* webpackChunkName: "integrations" */ '../views/Integrations.vue'),
+  Inbox: () => import(/* webpackChunkName: "inbox" */ '../views/Inbox.vue'),
+  Campaigns: () => import(/* webpackChunkName: "campaigns" */ '../views/Campaigns.vue'),
+  PendingApproval: () => import(/* webpackChunkName: "pending-approval" */ '../views/PendingApproval.vue'),
+  Mailboxes: () => import(/* webpackChunkName: "mailboxes" */ '../views/Mailboxes.vue'),
+  Analytics: () => import(/* webpackChunkName: "analytics" */ '../views/Analytics.vue')
+}
+
+// 预加载认证相关组件
+const authModules = {
+  Login: () => import(/* webpackChunkName: "auth" */ '@/views/auth/Login.vue'),
+  Signup: () => import(/* webpackChunkName: "auth" */ '@/views/auth/Signup.vue'),
+  OAuthCallback: () => import(/* webpackChunkName: "auth" */ '@/views/OAuthCallback.vue')
+}
+
+// 预加载认证组件
+Object.values(authModules).forEach(module => {
+  module()
+})
+
+// 预加载所有组件
+Object.values(viewModules).forEach(module => {
+  module()
+})
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,13 +48,13 @@ const router = createRouter({
         {
           path: 'login',
           name: 'login',
-          component: () => import('@/views/auth/Login.vue'),
+          component: authModules.Login,
           meta: { requiresGuest: true }
         },
         {
           path: 'signup',
           name: 'signup',
-          component: () => import('@/views/auth/Signup.vue'),
+          component: authModules.Signup,
           meta: { requiresGuest: true }
         }
       ]
@@ -39,59 +67,59 @@ const router = createRouter({
         {
           path: 'dashboard',
           name: 'dashboard',
-          component: () => import('@/views/Dashboard.vue')
+          component: viewModules.Dashboard
         },
         {
           path: 'chat',
           name: 'chat',
-          component: () => import('@/views/Chat.vue')
+          component: viewModules.Chat
         },
         {
           path: 'leads',
           name: 'leads',
-          component: () => import('@/views/Leads.vue')
+          component: viewModules.Leads
         },
         {
           path: 'leads/:id',
           name: 'lead-detail',
-          component: () => import('@/views/LeadDetail.vue')
+          component: viewModules.LeadDetail
         },
         {
           path: 'integrations',
           name: 'integrations',
-          component: () => import('@/views/Integrations.vue')
+          component: viewModules.Integrations
         },
         {
           path: 'inbox',
           name: 'inbox',
-          component: () => import('@/views/Inbox.vue')
+          component: viewModules.Inbox
         },
         {
           path: 'campaigns',
           name: 'campaigns',
-          component: () => import('@/views/Campaigns.vue')
+          component: viewModules.Campaigns
         },
         {
           path: 'pending-approval',
           name: 'pending-approval',
-          component: () => import('@/views/PendingApproval.vue')
+          component: viewModules.PendingApproval
         },
         {
           path: 'mailboxes',
           name: 'mailboxes',
-          component: () => import('@/views/Mailboxes.vue')
+          component: viewModules.Mailboxes
         },
         {
           path: 'analytics',
           name: 'analytics',
-          component: () => import('@/views/Analytics.vue')
+          component: viewModules.Analytics
         }
       ]
     },
     {
       path: '/oauth/callback',
       name: 'oauth-callback',
-      component: () => import('@/views/OAuthCallback.vue')
+      component: authModules.OAuthCallback
     }
   ]
 })

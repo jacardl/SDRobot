@@ -2,7 +2,7 @@
   <div class="flex items-center justify-center min-h-screen">
     <div class="text-center">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-      <p class="mt-4">Connecting your Gmail account...</p>
+      <p class="mt-4">{{ t('oauth.connecting') }}</p>
     </div>
   </div>
 </template>
@@ -13,6 +13,8 @@ import { useRouter } from 'vue-router'
 import { useMailboxStore } from '@/stores/mailbox'
 import { mailboxService } from '@/services/mailbox'
 import type { GmailMailbox } from '@/services/mailbox'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 const router = useRouter()
 const mailboxStore = useMailboxStore()

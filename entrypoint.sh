@@ -22,8 +22,8 @@ clean_project() {
     local dir=$1
     local name=$2
     log "Cleaning $name project..."
-    cd "$dir"
-    rm -rf node_modules dist package-lock.json .vite
+    #cd "$dir"
+    #rm -rf node_modules dist package-lock.json .vite
     npm cache clean --force
     log "$name project cleaned"
 }

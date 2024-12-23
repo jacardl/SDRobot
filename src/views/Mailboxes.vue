@@ -4,14 +4,12 @@
     <div class="flex justify-between items-center mb-4">
       <div>
         <div class="flex items-center gap-3">
-          <h1 class="text-2xl font-bold text-gray-900">Mailbox Connected</h1>
+          <h1 class="text-2xl font-bold text-gray-900">{{ t('mailboxes.title') }}</h1>
           <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-600">
             {{ mailboxStore.totalMailboxes }} / {{ mailboxStore.maxMailboxes }}
           </span>
         </div>
-        <p class="text-gray-500 mt-1">
-          JJ will dynamically rotate between your mailboxes, maximizing deliverability.
-        </p>
+        <p class="text-gray-500 mt-1">{{ t('mailboxes.description') }}</p>
       </div>
       <button
         @click="showAddMailboxModal = true"
@@ -19,7 +17,7 @@
         class="inline-flex items-center px-4 py-2 border border-transparent rounded-full shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <PlusIcon class="h-5 w-5 mr-2" />
-        Add Email Address
+        {{ t('mailboxes.actions.add') }}
       </button>
     </div>
 
@@ -27,31 +25,31 @@
     <div class="mt-8 bg-white rounded-lg shadow overflow-hidden">
       <div v-if="mailboxStore.loading" class="p-8 text-center text-gray-500">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-        <p class="mt-2">Loading mailboxes...</p>
+        <p class="mt-2">{{ t('mailboxes.loading') }}</p>
       </div>
 
       <div v-else-if="mailboxStore.error" class="p-8 text-center text-red-500">
         <ExclamationCircleIcon class="h-8 w-8 mx-auto" />
-        <p class="mt-2">{{ mailboxStore.error }}</p>
+        <p class="mt-2">{{ t('mailboxes.error') }}</p>
         <button
           @click="mailboxStore.loadMailboxes"
           class="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
         >
-          Retry
+          {{ t('mailboxes.actions.retry') }}
         </button>
       </div>
 
       <div v-else-if="mailboxStore.mailboxes.length === 0" class="p-8 text-center text-gray-500">
         <EnvelopeIcon class="h-12 w-12 mx-auto text-gray-400" />
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No mailboxes</h3>
-        <p class="mt-1 text-sm text-gray-500">Get started by connecting your first mailbox.</p>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">{{ t('mailboxes.noMailboxes.title') }}</h3>
+        <p class="mt-1 text-sm text-gray-500">{{ t('mailboxes.noMailboxes.description') }}</p>
         <div class="mt-6">
           <button
             @click="showAddMailboxModal = true"
             class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           >
             <PlusIcon class="h-5 w-5 mr-2" />
-            Add Email Address
+            {{ t('mailboxes.actions.add') }}
           </button>
         </div>
       </div>
@@ -346,13 +344,13 @@
                       class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                       @click="showAddMailboxModal = false"
                     >
-                      取消
+                      {{ t('mailboxes.actions.cancel') }}
                     </button>
                     <button
                       type="submit"
                       class="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700"
                     >
-                      登录
+                      {{ t('mailboxes.actions.login') }}
                     </button>
                   </div>
                 </form>
@@ -404,14 +402,14 @@
                     class="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                     @click="mailboxToDisconnect = null"
                   >
-                    Cancel
+                    {{ t('mailboxes.actions.cancel') }}
                   </button>
                   <button
                     type="button"
                     class="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                     @click="disconnectMailbox"
                   >
-                    Disconnect
+                    {{ t('mailboxes.actions.disconnect') }}
                   </button>
                 </div>
               </DialogPanel>
@@ -448,6 +446,8 @@ import { mailboxService } from '@/services/mailbox'
 import { GOOGLE_CONFIG } from '@/config/google'
 import CircleProgress from '@/components/CircleProgress.vue'
 import MailboxStatusTooltip from '@/components/MailboxStatusTooltip.vue'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 const mailboxStore = useMailboxStore()
 const showAddMailboxModal = ref(false)
@@ -510,7 +510,7 @@ const disconnectGmail = async (account: any) => {
     // 清除相关的本地存储
     localStorage.removeItem(`gmail_token_${account.email}`)
     
-    // 可选：通知��端清除令牌
+    // 可选：通知端清除令牌
     await fetch(`${import.meta.env.VITE_APP_URL}/api/gmail/disconnect`, {
       method: 'POST',
       headers: {

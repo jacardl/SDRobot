@@ -214,7 +214,7 @@ export default {
   },
   mailboxes: {
     title: '已连接邮箱',
-    description: 'Ava 将在您的邮箱之间动态轮换，最大化发送效率。',
+    description: 'JJ 将在您的邮箱之间动态轮换，最大化发送效率。',
     capacity: {
       title: '每日邮件容量',
       description: '此邮箱每天可发送的邮件数量'

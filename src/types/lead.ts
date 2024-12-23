@@ -1,0 +1,1 @@
+export type LeadStage = 'new' | 'contacted' | 'engaged' | 'qualified' | 'nurturing' | 'negotiating' | 'closed' 

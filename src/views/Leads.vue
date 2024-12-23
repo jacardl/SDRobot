@@ -80,7 +80,7 @@
                 class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full whitespace-nowrap"
                 :class="getStageClass(lead.stage)"
               >
-                {{ t(`leads.status.${lead.stage.toLowerCase()}`) }}
+                {{ t(`${lead.stage}`) }}
               </span>
             </div>
             <div class="px-6 py-4 min-w-0">
@@ -295,6 +295,10 @@ const closeLeadDetails = () => {
 watch(searchQuery, () => {
   currentPage.value = 1
 })
+
+const normalizeStage = (stage: string): string => {
+  return stage.toLowerCase().replace(/\s+/g, '_')
+}
 </script>
 
 <style scoped>

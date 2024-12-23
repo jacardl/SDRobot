@@ -33,6 +33,9 @@
       <main class="flex-1 overflow-x-hidden overflow-y-auto">
         <router-view />
       </main>
+      <div class="flex items-center">
+        <LanguageSelector />
+      </div>
     </div>
   </div>
 </template>
@@ -45,6 +48,7 @@ import SideNav from '@/components/SideNav.vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { ChevronDownIcon } from '@heroicons/vue/24/outline'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 
 const route = useRoute()
 const hideTopStatusBar = computed(() => {

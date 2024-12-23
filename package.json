@@ -1,12 +1,12 @@
 {
-  "name": "SDRobot",
+  "name": "sdrobot",
   "version": "1.0.0",
   "description": "一个现代化的销售线索(Leads)管理系统，帮助销售和市场营销人员高效管理潜在客户。",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "npm run dev"
+    "start": "vite"
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.23",

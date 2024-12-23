@@ -1,8 +1,9 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import { aiRouter } from './routes/ai'  // 使用命名导入
+import { aiRouter } from './routes/ai'
 
+// 加载环境变量
 dotenv.config()
 
 // 验证必要的环境变量
@@ -17,30 +18,32 @@ requiredEnvVars.forEach(varName => {
 const app = express()
 const PORT = process.env.PORT || 3000
 
-// 添加请求日志（放在最前面）
+// 添加请求日志
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`)
   next()
 })
 
-app.use(cors())
+// CORS 配置 - 允许所有域名访问
+app.use(cors({
+  origin: true,  // 允许所有域名
+  credentials: true
+}))
+
 app.use(express.json())
 
-// 添加根路由（用于测试服务器是否运行）
+// 根路由
 app.get('/', (req, res) => {
   res.json({ 
     status: 'ok', 
-    message: 'Server is running',
-    env: {
-      NODE_ENV: process.env.NODE_ENV,
-      PORT: PORT
-    }
+    message: 'Server is running'
   })
 })
 
+// API 路由
 app.use('/api/ai', aiRouter)
 
-// 错误处理中间件
+// 错误处理
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Server Error:', err)
   res.status(500).json({ 
@@ -49,6 +52,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   })
 })
 
+// 启动服务器
 const server = app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`)
 }).on('error', (err) => {
@@ -63,14 +67,4 @@ process.on('SIGTERM', () => {
     console.log('Server closed')
     process.exit(0)
   })
-})
-
-// server/src/app.ts
-app.use((req, res, next) => {
-  console.log('Request:', {
-    method: req.method,
-    path: req.path,
-    body: req.body
-  })
-  next()
 })

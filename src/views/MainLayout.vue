@@ -56,17 +56,21 @@ import TopStatusBar from '@/components/TopStatusBar.vue'
 import SideNav from '@/components/SideNav.vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { ChevronDownIcon } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
+const { locale } = useI18n()
+
+// 隐藏顶部状态栏的页面
 const hideTopStatusBar = computed(() => {
   return route.name === 'chat' || route.name === 'lead-detail'
 })
 
-// 从本地存储获取初始状态，如果没有则默认为展开状态
+// 侧边栏折叠状态
 const isCollapsed = ref(localStorage.getItem('sideNavCollapsed') === 'true')
 
-// 监听状态变化并保存到本地存储
+// 监听折叠状态变化
 watch(isCollapsed, (newValue) => {
   localStorage.setItem('sideNavCollapsed', newValue.toString())
 })
@@ -75,18 +79,13 @@ const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value
 }
 
-const router = useRouter()
-const authStore = useAuthStore()
+// 用户菜单相关
 const showUserMenu = ref(false)
-const { locale } = useI18n()
-
-// 用户头像，可以从 store 中获取或使用默认头像
 const userAvatar = 'https://ui-avatars.com/api/?name=User'
 
-// 处理登出
 const handleLogout = () => {
-  authStore.logout()  // 调用 store 的登出方法
-  router.push('/auth/login')  // 重定向到登录页
-  showUserMenu.value = false  // 关闭下拉菜单
+  authStore.logout()
+  router.push('/auth/login')
+  showUserMenu.value = false
 }
 </script> 

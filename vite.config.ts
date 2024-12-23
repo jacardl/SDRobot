@@ -23,9 +23,9 @@ export default defineConfig({
       strict: false
     },
     hmr: {
-      host: 'www.sdrobot.top',
-      protocol: 'wss',
-      clientPort: 443
+      //host: 'www.sdrobot.top',
+      //protocol: 'wss',
+      //clientPort: 443
     }
   },
   preview: {

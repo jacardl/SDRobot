@@ -229,6 +229,8 @@ export default {
     },
     actions: {
       add: 'Add Email Address',
+      cancel: 'Cancel',
+      login: 'Login',
       disconnect: 'Disconnect',
       retry: 'Retry',
       useMailbox: 'Use This Mailbox'

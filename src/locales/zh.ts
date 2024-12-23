@@ -231,6 +231,8 @@ export default {
     },
     actions: {
       add: '添加邮箱',
+      cancel: '取消',
+      login: '登录',
       disconnect: '断开连接',
       retry: '重试',
       useMailbox: '使用此邮箱'

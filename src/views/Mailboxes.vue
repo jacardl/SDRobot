@@ -17,7 +17,7 @@
         class="inline-flex items-center px-4 py-2 border border-transparent rounded-full shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <PlusIcon class="h-5 w-5 mr-2" />
-        {{ t('mailboxes.actions.add') }}
+        {{ t('add') }}
       </button>
     </div>
 
@@ -35,7 +35,7 @@
           @click="mailboxStore.loadMailboxes"
           class="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
         >
-          {{ t('mailboxes.actions.retry') }}
+          {{ t('retry') }}
         </button>
       </div>
 
@@ -49,7 +49,7 @@
             class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           >
             <PlusIcon class="h-5 w-5 mr-2" />
-            {{ t('mailboxes.actions.add') }}
+            {{ t('add') }}
           </button>
         </div>
       </div>
@@ -344,13 +344,13 @@
                       class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                       @click="showAddMailboxModal = false"
                     >
-                      {{ t('mailboxes.actions.cancel') }}
+                      {{ t('cancel') }}
                     </button>
                     <button
                       type="submit"
                       class="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700"
                     >
-                      {{ t('mailboxes.actions.login') }}
+                      {{ t('login') }}
                     </button>
                   </div>
                 </form>
@@ -402,14 +402,14 @@
                     class="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                     @click="mailboxToDisconnect = null"
                   >
-                    {{ t('mailboxes.actions.cancel') }}
+                    {{ t('cancel') }}
                   </button>
                   <button
                     type="button"
                     class="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                     @click="disconnectMailbox"
                   >
-                    {{ t('mailboxes.actions.disconnect') }}
+                    {{ t('disconnect') }}
                   </button>
                 </div>
               </DialogPanel>

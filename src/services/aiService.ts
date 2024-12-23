@@ -2,7 +2,10 @@ import { EventEmitter } from '../utils/EventEmitter'
 import axios from 'axios'
 
 // API 配置
-const API_URL = import.meta.env.VITE_API_URL
+const API_URL = import.meta.env.VITE_APP_URL || 'http://localhost:3000'
+if (!API_URL || API_URL === 'undefined') {
+  console.error('VITE_APP_URL is not properly loaded:', import.meta.env)
+}
 
 // 类型定义
 interface Message {
@@ -23,10 +26,13 @@ class AIService {
     const eventEmitter = new EventEmitter()
 
     try {
-      console.log('Frontend sending request to:', `${API_URL}/chat`)
+      console.log('Frontend sending request to:', `${API_URL}/api/ai/chat`)
       console.log('Request data:', { messages })
 
-      const response = await axios.post(`${API_URL}/chat`, {
+      const requestUrl = `${API_URL}/api/ai/chat`
+      console.log('Complete request URL:', requestUrl)
+
+      const response = await axios.post(requestUrl, {
         messages
       }, {
         headers: {

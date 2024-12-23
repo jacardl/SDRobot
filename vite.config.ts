@@ -28,4 +28,10 @@ export default defineConfig({
       external: ['googleapis'],
     },
   },
+  define: {
+    __VUE_OPTIONS_API__: false,
+    'process.env': {
+      VITE_APP_URL: process.env.VITE_APP_URL
+    }
+  }
 })

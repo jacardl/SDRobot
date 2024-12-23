@@ -511,7 +511,7 @@ const disconnectGmail = async (account: any) => {
     localStorage.removeItem(`gmail_token_${account.email}`)
     
     // 可选：通知��端清除令牌
-    await fetch(`${import.meta.env.VITE_API_URL}/api/gmail/disconnect`, {
+    await fetch(`${import.meta.env.VITE_APP_URL}/api/gmail/disconnect`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

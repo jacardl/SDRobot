@@ -164,7 +164,7 @@ export class MailboxService {
   async handleGmailCallback(code: string) {
     try {
       // 交换授权码获取令牌
-      const tokenResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/gmail/token`, {
+      const tokenResponse = await fetch(`${import.meta.env.VITE_APP_URL}/api/gmail/token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code })
@@ -209,7 +209,7 @@ export class MailboxService {
   // 获取 Gmail 邮件列表
   async getGmailMessages(mailbox: any) {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/gmail/messages`, {
+      const response = await fetch(`${import.meta.env.VITE_APP_URL}/api/gmail/messages`, {
         headers: {
           'Authorization': `Bearer ${mailbox.accessToken}`
         }
@@ -228,7 +228,7 @@ export class MailboxService {
   // 发送邮件
   async sendEmail(options: EmailOptions): Promise<void> {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}/api/gmail/send`, {
+      await fetch(`${import.meta.env.VITE_APP_URL}/api/gmail/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -286,7 +286,7 @@ export class MailboxService {
   // 同步 Gmail 邮件
   async syncGmailMessages(mailbox: any) {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/gmail/sync`, {
+      const response = await fetch(`${import.meta.env.VITE_APP_URL}/api/gmail/sync`, {
         headers: {
           Authorization: `Bearer ${mailbox.accessToken}`
         }
@@ -304,7 +304,7 @@ export class MailboxService {
   // 发送 Gmail 邮件
   async sendGmailMessage(mailbox: GmailMailbox, options: GmailSendOptions) {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/gmail/send`, {
+      const response = await fetch(`${import.meta.env.VITE_APP_URL}/api/gmail/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -331,7 +331,7 @@ export class MailboxService {
   async getGmailMessageDetail(mailbox: GmailMailbox, messageId: string) {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/gmail/messages/${messageId}`,
+        `${import.meta.env.VITE_APP_URL}/api/gmail/messages/${messageId}`,
         {
           headers: {
             'Authorization': `Bearer ${mailbox.accessToken}`
@@ -351,7 +351,7 @@ export class MailboxService {
   async markGmailMessageRead(mailbox: GmailMailbox, messageId: string) {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/gmail/messages/${messageId}/read`,
+        `${import.meta.env.VITE_APP_URL}/api/gmail/messages/${messageId}/read`,
         {
           method: 'POST',
           headers: {
@@ -372,7 +372,7 @@ export class MailboxService {
   async getGmailThread(mailbox: GmailMailbox, threadId: string) {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/gmail/threads/${threadId}`,
+        `${import.meta.env.VITE_APP_URL}/api/gmail/threads/${threadId}`,
         {
           headers: {
             'Authorization': `Bearer ${mailbox.accessToken}`
@@ -408,7 +408,7 @@ export class MailboxService {
   }
 
   private async refreshAccessToken(refreshToken: string): Promise<GmailAuthResponse> {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/gmail/refresh`, {
+    const response = await fetch(`${import.meta.env.VITE_APP_URL}/api/gmail/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh_token: refreshToken })

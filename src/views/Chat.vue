@@ -152,7 +152,12 @@ interface Message {
   quickReplies?: string[]
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_URL = import.meta.env.VITE_APP_URL
+console.log('Chat API Configuration:', {
+  VITE_APP_URL: import.meta.env.VITE_APP_URL,
+  API_URL,
+  fullUrl: `${API_URL}/api/ai/chat`
+})
 const messages = ref<Message[]>([])
 const newMessage = ref('')
 const isLoading = ref(false)
@@ -317,7 +322,7 @@ const sendMessage = async (content?: string, retryCount = 0) => {
       body: JSON.stringify({
         messages: [{ role: 'user', content: messageContent }]
       }),
-      signal: abortController.value.signal  // 添加中止信号
+      signal: abortController.value.signal
     })
 
     if (!response.ok) {

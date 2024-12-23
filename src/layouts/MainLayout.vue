@@ -8,7 +8,7 @@
       <div class="p-4 flex items-center justify-between">
         <div class="flex items-center space-x-2" :class="{ 'justify-center': isCollapsed }">
           <img src="@/assets/logo.svg" alt="Logo" class="h-8 w-8" />
-          <span class="text-xl font-bold transition-opacity duration-300" :class="{ 'opacity-0 w-0': isCollapsed }">Skyline</span>
+          <span class="text-xl font-bold transition-opacity duration-300" :class="{ 'opacity-0 w-0': isCollapsed }">SDRobot</span>
         </div>
         <button 
           @click="toggleCollapse" 

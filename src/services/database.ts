@@ -52,7 +52,7 @@ export interface DBLead {
 export class DatabaseService {
   private db: IDBDatabase | null = null;
   private initialized = false;
-  private readonly DB_NAME = 'skyline_db';
+  private readonly DB_NAME = 'SDRobot_db';
   private readonly DB_VERSION = 1;  // 重置版本号为 1
   
   async init() {
@@ -278,7 +278,7 @@ export class DatabaseService {
       await this.ensureInitialized();
       
       // 检查默认账号是否已存在
-      const defaultEmail = 'admin@skyline.com';
+      const defaultEmail = 'admin@SDRobot.com';
       console.log('Checking if default account exists:', defaultEmail);
       const existingUser = await this.findUserByEmail(defaultEmail);
       

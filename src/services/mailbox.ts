@@ -52,7 +52,7 @@ export interface ManualMailbox {
 
 const mailboxes: Mailbox[] = [
   {
-    email: 'jaspar@Skyline.com',
+    email: 'jaspar@SDRobot.com',
     capacity: 75,
     enabled: true,
     status: 'Urgent Issues',
@@ -67,7 +67,7 @@ const mailboxes: Mailbox[] = [
     }
   },
   {
-    email: 'jasparcarjack@Skyline.com',
+    email: 'jasparcarjack@SDRobot.com',
     capacity: 70,
     enabled: true,
     status: 'Warning',
@@ -82,7 +82,7 @@ const mailboxes: Mailbox[] = [
     }
   },
   {
-    email: 'jasparcj@Skyline.com',
+    email: 'jasparcj@SDRobot.com',
     capacity: 75,
     enabled: true,
     status: 'Healthy',

@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: 'skyline',
+    name: 'SDRobot',
     script: 'npm',
     args: 'run preview',
     cwd: '/home/devbox/project',

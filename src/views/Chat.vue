@@ -134,7 +134,7 @@
 
 <script setup lang="ts">
 import { constructFromSymbol } from 'date-fns/constants';
-import { ref, onMounted, nextTick, watch } from 'vue'
+import { ref, onMounted, nextTick, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 interface Message {
@@ -155,7 +155,7 @@ const messages = ref<Message[]>([])
 const newMessage = ref('')
 const isLoading = ref(false)
 const chatContainer = ref<HTMLElement | null>(null)
-const welcomeMessage = "👋 Hi! 欢迎来到 SDRobot AI！我是 JJ，你的数字销售助手。我在这是为了让你销售之旅更加顺畅。你是想听我做什么，还是直接开始流程呢？"
+const welcomeMessage = computed(() => t('chat.welcome'))
 const isTyping = ref(false)
 const typingSpeed = 50
 const displayContents = ref<{ [key: number]: string }>({})
@@ -302,7 +302,7 @@ const sendMessage = async (content?: string, retryCount = 0) => {
       timestamp: new Date()
     })
 
-    // 清空输入框并设置加载状态
+    // 清空输���框并设置加载状态
     newMessage.value = ''
     isLoading.value = true
     scrollToBottom()
@@ -403,9 +403,17 @@ const handleKeyDown = async (e: KeyboardEvent) => {
     return  // 如果输入法正在输入，直接返回
   }
 
-  // 只处理单独的回车键，不处理shift+enter
-  if (e.key === 'Enter' && !e.shiftKey) {
+  // 处理 shift + enter
+  if (e.key === 'Enter') {
     e.preventDefault()  // 阻止默认行为
+    
+    if (e.shiftKey) {
+      // shift + enter 重新开��对话
+      startNewChat()
+      return
+    }
+    
+    // 普通 enter 发送消息
     if (newMessage.value.trim()) {
       const messageContent = newMessage.value
       newMessage.value = ''  // 立即清空输入框
@@ -416,6 +424,13 @@ const handleKeyDown = async (e: KeyboardEvent) => {
 
 // 初始化对话
 const startNewChat = () => {
+  // 停止任何正在进行的请求
+  if (abortController.value) {
+    abortController.value.abort()
+    abortController.value = null
+  }
+
+  // 清空所有状态
   messages.value = []
   localStorage.removeItem(STORAGE_KEY)
   newMessage.value = ''
@@ -423,7 +438,7 @@ const startNewChat = () => {
   scrollToBottom()
 }
 
-// 添加新的滚动函��
+// 添加新的滚动函数
 const scrollToMessage = async (messageId: number) => {
   await nextTick()
   const messageElement = document.querySelector(`[data-message-id="${messageId}"]`)
@@ -518,7 +533,7 @@ textarea {
   overflow-y: hidden;
 }
 
-/* 隐藏 textarea 的 resize 手柄 */
+/* 隐藏 textarea 的 resize 柄 */
 textarea::-webkit-resizer {
   display: none;
 }

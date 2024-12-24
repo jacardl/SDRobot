@@ -70,12 +70,13 @@ export default {
     error: '账户连接失败'
   },
   chat: {
-    placeholder: '输入您的消息...',
+    placeholder: '按 Enter 发送，按 Shift + Enter 开启新对话',
     send: '发送',
     networkError: '网络错误，请检查网络连接后重试。',
     typing: 'AI 正在输入...',
     retry: '重试',
-    stop: '停止'
+    stop: '停止',
+    welcome: "👋 你好！欢迎来到 SDRobot AI ！我是 JJ ，你的数字销售助手。我在这是为了让你销售之旅更加顺畅。你是想听我做什么，还是直接开始流程呢？"
   },
   leads: {
     search: '搜索线索...',
@@ -131,7 +132,7 @@ export default {
   leadDetail: {
     tabs: {
       overview: '概览',
-      activity: '活动',
+      activity: '��动',
       emails: '邮件',
       notes: '笔记'
     },

@@ -69,12 +69,13 @@ export default {
     error: 'Failed to connect account'
   },
   chat: {
-    placeholder: 'Type your message...',
+    placeholder: 'Press Enter to send, Shift + Enter to start new chat',
     send: 'Send',
     networkError: 'Network error. Please check your connection and try again.',
     typing: 'AI is typing...',
     retry: 'Retry',
-    stop: 'Stop'
+    stop: 'Stop',
+    welcome: "👋 Hi! Welcome to SDRobot AI! I'm JJ, your digital sales assistant. I'm here to make your sales journey smoother. Would you like to hear what I can do, or shall we get started?"
   },
   leads: {
     search: 'Search leads...',

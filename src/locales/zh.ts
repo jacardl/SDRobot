@@ -70,6 +70,7 @@ export default {
     error: '账户连接失败'
   },
   chat: {
+    title: '与 Mia 对话',
     placeholder: '按 Enter 发送，按 Shift + Enter 开启新对话',
     send: '发送',
     networkError: '网络错误，请检查网络连接后重试。',

@@ -9,5 +9,47 @@
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
+    <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.1.0-beta.0/libs/cn/index.js"></script>
+    <script>
+        // 获取当前域名
+        const currentDomain = window.location.origin;
+        const i18n = window.i18n; // 获取 i18n 实例
+        
+        new CozeWebSDK.WebChatClient({
+          config: {
+            bot_id: '7447488728291557414',
+          },
+          componentProps: {
+             title: 'Chat with Mia',
+           },
+          ui: {
+            base: {
+              icon: `${currentDomain}/src/assets/jj-avatar.png`,  // 使用动态域名
+              layout: 'pc',
+              zIndex: 1000,
+              className: 'coze-chat-icon'
+            },
+            footer: {
+              isShow: false,
+            },
+          },
+          userInfo: {
+            id: '12345',
+            url: `${currentDomain}/src/assets/user-avatar.svg`,  // 使用动态域名
+            nickname: 'J&A',
+          },
+          chatBot: {
+            uploadable: true,
+            width: 800,
+            el: undefined,
+            onHide: () => {
+              // todo...
+            },
+            onShow: () => {
+              // todo...
+            },
+          },
+        });
+    </script>
   </body>
 </html>

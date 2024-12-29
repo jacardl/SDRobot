@@ -6,7 +6,7 @@ import AuthLayout from '@/layouts/AuthLayout.vue'
 // 预加载所有视图组件
 const viewModules = {
   Dashboard: () => import(/* webpackChunkName: "dashboard" */ '../views/Dashboard.vue'),
-  Chat: () => import(/* webpackChunkName: "chat" */ '../views/Chat.vue'),
+  //Chat: () => import(/* webpackChunkName: "chat" */ '../views/Chat.vue'),
   Leads: () => import(/* webpackChunkName: "leads" */ '../views/Leads.vue'),
   LeadDetail: () => import(/* webpackChunkName: "lead-detail" */ '../views/LeadDetail.vue'),
   Integrations: () => import(/* webpackChunkName: "integrations" */ '../views/Integrations.vue'),
@@ -69,11 +69,11 @@ const router = createRouter({
           name: 'dashboard',
           component: viewModules.Dashboard
         },
-        {
-          path: 'chat',
-          name: 'chat',
-          component: viewModules.Chat
-        },
+        // {
+        //   path: 'chat',
+        //   name: 'chat',
+        //   component: viewModules.Chat
+        // },
         {
           path: 'leads',
           name: 'leads',

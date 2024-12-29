@@ -100,7 +100,7 @@ const { t } = useI18n()
 // 主要导航项
 const mainMenuItems = computed(() => [
   { name: t('nav.dashboard'), path: '/', icon: HomeIcon },
-  { name: t('nav.chat'), path: '/chat', icon: ChatBubbleLeftRightIcon },
+ // { name: t('nav.chat'), path: '/chat', icon: ChatBubbleLeftRightIcon },
   { name: t('nav.integrations'), path: '/integrations', icon: PuzzlePieceIcon },
   { name: t('nav.leads'), path: '/leads', icon: UserGroupIcon },
 ])

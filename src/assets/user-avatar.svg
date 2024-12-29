@@ -1,5 +1,18 @@
-<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="16" cy="16" r="16" fill="#E5E7EB"/>
-  <path d="M16 16C18.2091 16 20 14.2091 20 12C20 9.79086 18.2091 8 16 8C13.7909 8 12 9.79086 12 12C12 14.2091 13.7909 16 16 16Z" fill="#9CA3AF"/>
-  <path d="M24 24C24 20.6863 20.4183 18 16 18C11.5817 18 8 20.6863 8 24" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"/>
-</svg> 
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆 -->
+  <circle cx="100" cy="100" r="100" fill="url(#gradient)" />
+  
+  <!-- 头像轮廓 -->
+  <path d="M100 50C77.909 50 60 67.909 60 90C60 112.091 77.909 130 100 130C122.091 130 140 112.091 140 90C140 67.909 122.091 50 100 50Z" fill="#FFFFFF" />
+  
+  <!-- 身体轮廓 -->
+  <path d="M155 160C155 137.909 130.376 120 100 120C69.6243 120 45 137.909 45 160" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" />
+  
+  <!-- 渐变定义 -->
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" style="stop-color:#4CAF50" />
+      <stop offset="100%" style="stop-color:#45B649" />
+    </linearGradient>
+  </defs>
+</svg>  

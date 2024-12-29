@@ -69,6 +69,7 @@ export default {
     error: 'Failed to connect account'
   },
   chat: {
+    title: 'Chat with Mia',
     placeholder: 'Press Enter to send, Shift + Enter to start new chat',
     send: 'Send',
     networkError: 'Network error. Please check your connection and try again.',

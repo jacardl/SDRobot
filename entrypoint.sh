@@ -15,7 +15,7 @@ warn() { echo -e "${YELLOW}[$(date +'%Y-%m-%d %H:%M:%S')] WARNING: $1${NC}"; }
 # 定义项目路径
 PROJECT_ROOT="/home/devbox/project"
 FRONTEND_DIR="$PROJECT_ROOT"
-BACKEND_DIR="$PROJECT_ROOT/server"
+#BACKEND_DIR="$PROJECT_ROOT/server"
 
 # 清理缓存和构建文件
 clean_project() {
@@ -77,13 +77,13 @@ main() {
     
     # 后端
     log "Processing backend..."
-    clean_project "$BACKEND_DIR" "Backend"
-    install_dependencies "$BACKEND_DIR" "Backend"
-    build_project "$BACKEND_DIR" "Backend"
+    #clean_project "$BACKEND_DIR" "Backend"
+    #install_dependencies "$BACKEND_DIR" "Backend"
+    #build_project "$BACKEND_DIR" "Backend"
     
     # 启动服务
     log "Starting services..."
-    start_service "$BACKEND_DIR" "Backend" "dev"
+    #start_service "$BACKEND_DIR" "Backend" "dev"
     start_service "$FRONTEND_DIR" "Frontend" "dev"
     
     log "All services started successfully!"
